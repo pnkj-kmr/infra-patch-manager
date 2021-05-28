@@ -3,78 +3,63 @@ package main
 import (
 	"fmt"
 
-	"github.com/pnkj-kmr/patch/record"
+	"github.com/pnkj-kmr/patch/request"
+	"github.com/pnkj-kmr/patch/segment/tar"
 )
 
 func main() {
-	// READ CHECK
-	// d, err := record.NewDir(record.LocationPatch)
-	// fmt.Println(d)
-	// fmt.Println(d.Info.Mode())
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// files, err := d.Scan()
-	// // fmt.Println(files)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// for _, file := range files {
-	// 	fmt.Println(file.Path, file.RPath, file.SubPath, file.Info.Name())
-	// 	// fmt.Println(file)
-	// }
+	dsts := []string{"tmp3"}
 
-	// FILE WRITE CHECK
-	// src := "portfolio/redo/rent_jan_mar_2021.pdf"
-	// src := "portfolio/redo/sub1/sub1-2/rent_receipt.pdf"
-	// f, err := record.NewFile(record.LocationPatch, src)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	err := request.RollbackFrom(dsts[0])
+	if err != nil {
+		fmt.Println("Rollback>>>>\n", err)
+	}
 
-	// dst, err := record.NewDir("tmp")
-	// if err != nil && os.IsNotExist(err) {
-	// 	fmt.Println("Copy: ", err)
-	// 	return
-	// }
+	dmap, err := request.VerifyRollback(dsts[0])
+	if err != nil {
+		fmt.Println("Watch  >>>", dmap, err)
+	}
 
-	// err = f.Copy(dst)
-	// if err != nil {
-	// 	fmt.Printf("Copy failed %q\n", err)
-	// } else {
-	// 	fmt.Printf("Copy succeeded\n")
-	// }
+	t := tar.New("nLZe4C__1622227634638736000", "tar.gz", "uploads")
+	err = request.ExtractIntoPatchDir(t)
+	if err != nil {
+		fmt.Printf("Extract--- %q\n", err)
+	}
 
-	dsts := []string{"tmp", "tmp2", "tmp3"}
-	err := record.ApplyPatch(dsts)
+	err = request.ApplyPatchTo(dsts)
 	if err != nil {
 		fmt.Printf("Copy failed %q\n", err)
 	}
-	// // FOLDER WRITE CHECK
-	// src, err := record.NewDir(record.LocationPatch)
-	// if err != nil && os.IsNotExist(err) {
-	// 	fmt.Println("Copy: ", err)
-	// 	return
-	// }
-	// dst := "tmp"
-	// err = src.Copy(dst)
+
+	dmap, err = request.VerifyPatch(dsts)
+	if err != nil {
+		fmt.Println("Watch  >>>", dmap, err)
+	}
+
+	dmap, err = request.VerifyRollback(dsts[0])
+	if err != nil {
+		fmt.Println("Watch  >>>", dmap, err)
+	}
+
+	dmap, err = request.CheckRights(dsts)
+	if err != nil {
+		fmt.Println("Check Rights>>>>\n", dmap, err)
+	}
+
+	// err = request.CleanRollbackDir()
 	// if err != nil {
-	// 	fmt.Printf("Folder Copy failed %q\n", err)
-	// } else {
-	// 	fmt.Printf("Folder Copy succeeded\n")
+	// 	fmt.Println("CleanRollbackDir>>>>\n", err)
 	// }
 
-	// // FOLDER WRITE CHECK
-	// src, err = record.NewDir("tmp")
-	// if err != nil && os.IsNotExist(err) {
-	// 	fmt.Println("Copy: ", err)
-	// 	return
-	// }
-	// dst = record.LocationRollback
-	// err = src.Copy(dst)
-	// if err != nil {
-	// 	fmt.Printf("Folder Copy failed %q\n", err)
-	// } else {
-	// 	fmt.Printf("Folder Copy succeeded\n")
-	// }
+	// t := tar.T{Name: utility.RandomString(6), Ext: "tar.gz"}
+	// t := tar.New(utility.RandomString(6), "tar.gz", "")
+	// t := tar.New("HFfiAW", "tar.gz", "")
+	// err := t.Tar([]string{filepath.Join("portfolio", "redo")})
+	// err := t.Untar(filepath.Join("asset", "patch"))
+	// fmt.Println("TAR : >>>", err)
+
+	// s, _ := file.F{P: "aaaa/bbb/c.txt", R: "bbb/c.txt", S: "", I: nil}
+	// s, _ := file.New("asset/patch/redo/rent_jan_mar_2021.pdf", "asset/patch")
+	// fmt.Println(s.RPath())
+
 }

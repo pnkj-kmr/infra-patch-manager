@@ -1,5 +1,6 @@
 web
-portfolio/redo
-portfolio/undo
-tmp
+asset/patch
+asset/revoke
+**/*.tar*
+tmp*
 .DS_Store
