@@ -27,5 +27,5 @@ func RandomStringWithTime(n int) string {
 	for i := range b {
 		b[i] = letters[rand.Int63()%int64(len(letters))]
 	}
-	return string(b) + "__" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	return string(b) + "__" + strconv.FormatInt(time.Now().Unix(), 10)
 }

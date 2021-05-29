@@ -3,50 +3,50 @@ package main
 import (
 	"fmt"
 
-	"github.com/pnkj-kmr/patch/request"
-	"github.com/pnkj-kmr/patch/segment/tar"
+	"github.com/pnkj-kmr/patch/module/tar"
+	"github.com/pnkj-kmr/patch/task"
 )
 
 func main() {
 	dsts := []string{"tmp3"}
 
-	err := request.RollbackFrom(dsts[0])
+	err := task.RollbackFrom(dsts[0])
 	if err != nil {
 		fmt.Println("Rollback>>>>\n", err)
 	}
 
-	dmap, err := request.VerifyRollback(dsts[0])
+	dmap, err := task.VerifyRollback(dsts[0])
 	if err != nil {
 		fmt.Println("Watch  >>>", dmap, err)
 	}
 
-	t := tar.New("qBoosA__1622230152673708000", "tar.gz", "uploads")
-	err = request.ExtractIntoPatchDir(t)
+	t := tar.New("ROLLBACK__1622290827", "tar.gz", "uploads")
+	err = task.ExtractIntoPatchDir(t)
 	if err != nil {
 		fmt.Printf("Extract--- %q\n", err)
 	}
 
-	err = request.ApplyPatchTo(dsts)
+	err = task.ApplyPatchTo(dsts)
 	if err != nil {
 		fmt.Printf("Copy failed %q\n", err)
 	}
 
-	dmap, err = request.VerifyPatch(dsts)
+	dmap, err = task.VerifyPatch(dsts)
 	if err != nil {
 		fmt.Println("Watch  >>>", dmap, err)
 	}
 
-	dmap, err = request.VerifyRollback(dsts[0])
+	dmap, err = task.VerifyRollback(dsts[0])
 	if err != nil {
 		fmt.Println("Watch  >>>", dmap, err)
 	}
 
-	dmap, err = request.CheckRights(dsts)
+	dmap, err = task.CheckRights(dsts)
 	if err != nil {
 		fmt.Println("Check Rights>>>>\n", dmap, err)
 	}
 
-	// err = request.CleanRollbackDir()
+	// err = task.CleanRollbackDir()
 	// if err != nil {
 	// 	fmt.Println("CleanRollbackDir>>>>\n", err)
 	// }

@@ -4,7 +4,7 @@ import (
 	"io/fs"
 	"path/filepath"
 
-	"github.com/pnkj-kmr/patch/segment/file"
+	"github.com/pnkj-kmr/patch/module/file"
 )
 
 // Scan helps to scan the directory

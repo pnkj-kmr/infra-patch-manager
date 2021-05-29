@@ -7,11 +7,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pnkj-kmr/patch/segment"
+	"github.com/pnkj-kmr/patch/module"
 )
 
 // Copy helps mkdir
-func (f *F) Copy(dst segment.I) (err error) {
+func (f *F) Copy(dst module.I) (err error) {
 	if !f.Mode().IsRegular() {
 		return fmt.Errorf("Copy: non-regular source file %s (%q)", f.Name(), f.Mode().String())
 	}

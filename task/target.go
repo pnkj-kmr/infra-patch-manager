@@ -1,10 +1,10 @@
-package request
+package task
 
 import (
 	"log"
 	"time"
 
-	"github.com/pnkj-kmr/patch/segment/dir"
+	"github.com/pnkj-kmr/patch/module/dir"
 	"github.com/pnkj-kmr/patch/utility"
 )
 

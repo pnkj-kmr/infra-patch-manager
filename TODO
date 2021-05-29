@@ -3,10 +3,11 @@
 3 - tar exacting and setting up patch folder - DONE
 3a- api to list those data | verification from gui
 4 - gRPC setup of client and server
-5 - data moving from src to dst 
+5 - data moving from src to dst (client/server)
 6 - pre-check for dst folder read/write previlige   - DONE
 7 - folder scan result
 8 - rollback process - DONE
+9 - cmd list - and its result back from terminal
 
 
 

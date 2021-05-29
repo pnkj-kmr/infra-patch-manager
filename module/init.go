@@ -1,4 +1,4 @@
-package segment
+package module
 
 import (
 	"io/fs"

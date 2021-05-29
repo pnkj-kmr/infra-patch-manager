@@ -1,4 +1,4 @@
-package request
+package task
 
 import (
 	"log"
@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pnkj-kmr/patch/segment/dir"
-	"github.com/pnkj-kmr/patch/segment/tar"
+	"github.com/pnkj-kmr/patch/module/dir"
+	"github.com/pnkj-kmr/patch/module/tar"
 )
 
 // CleanPatchDir cleans the patch folder

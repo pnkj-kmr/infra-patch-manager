@@ -1,13 +1,13 @@
-package request
+package task
 
 import (
 	"log"
 	"path/filepath"
 	"time"
 
-	"github.com/pnkj-kmr/patch/segment/dir"
-	"github.com/pnkj-kmr/patch/segment/file"
-	"github.com/pnkj-kmr/patch/segment/tar"
+	"github.com/pnkj-kmr/patch/module/dir"
+	"github.com/pnkj-kmr/patch/module/file"
+	"github.com/pnkj-kmr/patch/module/tar"
 	"github.com/pnkj-kmr/patch/utility"
 )
 
@@ -30,7 +30,7 @@ func CompressRollbackDir() (err error) {
 	if err != nil {
 		return err
 	}
-	t := tar.New(utility.RandomStringWithTime(6), "tar.gz", upload.Path())
+	t := tar.New("ROLLBACK"+utility.RandomStringWithTime(0), "tar.gz", upload.Path())
 	return t.Tar([]string{rollback.Path()})
 }
 
