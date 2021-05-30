@@ -1,0 +1,44 @@
+[
+    {
+        "name": "remote1",
+        "address": "0.0.0.0:8080",
+        "apps": [
+            {
+                "apptype": "dc",
+                "name": "remote1-app1",
+                "path": "./tmp/app1",
+                "service": "app1"
+            },
+            {
+                "apptype": "dc",
+                "name": "remote1-app2",
+                "path": "./tmp/app2",
+                "service": "app2"
+            }
+        ]
+    },
+    {
+        "name": "remote2",
+        "address": "0.0.0.0:8081",
+        "apps": [
+            {
+                "app_type": "app",
+                "name": "remote-2-app2",
+                "path": "./tmp2/app1",
+                "service": "app1"
+            }
+        ]
+    },
+    {
+        "name": "remote3",
+        "address": "0.0.0.0:8083",
+        "apps": [
+            {
+                "app_type": "app",
+                "name": "remote-3-app3",
+                "path": "./tmp3/app3",
+                "service": "app1"
+            }
+        ]
+    }
+]

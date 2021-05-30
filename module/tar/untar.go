@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/pnkj-kmr/patch/utility"
 )
 
 // Untar helps to extract the given tar/tar.gz file
@@ -39,9 +41,8 @@ func (t *T) Untar(extractPath string) (err error) {
 		}
 
 		if skipBaseDir == "" {
-			// TODO - "revoke" need to replace with variable name
-			if strings.Split(header.Name, string(os.PathSeparator))[0] == "revoke" {
-				skipBaseDir = "revoke"
+			if strings.Split(header.Name, string(os.PathSeparator))[0] == utility.RevokeDirectory {
+				skipBaseDir = utility.RevokeDirectory
 			}
 		}
 

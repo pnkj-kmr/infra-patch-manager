@@ -5,6 +5,7 @@ import (
 
 	"github.com/pnkj-kmr/patch/module/tar"
 	"github.com/pnkj-kmr/patch/task"
+	"github.com/pnkj-kmr/patch/utility"
 )
 
 func main() {
@@ -20,8 +21,8 @@ func main() {
 		fmt.Println("Watch  >>>", dmap, err)
 	}
 
-	t := tar.New("ROLLBACK__1622290827", "tar.gz", "uploads")
-	err = task.ExtractIntoPatchDir(t)
+	t := tar.New("test", "tar.gz", utility.AssetsDirectory)
+	err = task.ExtractIntoRemedyDir(t)
 	if err != nil {
 		fmt.Printf("Extract--- %q\n", err)
 	}
@@ -45,21 +46,5 @@ func main() {
 	if err != nil {
 		fmt.Println("Check Rights>>>>\n", dmap, err)
 	}
-
-	// err = task.CleanRollbackDir()
-	// if err != nil {
-	// 	fmt.Println("CleanRollbackDir>>>>\n", err)
-	// }
-
-	// t := tar.T{Name: utility.RandomString(6), Ext: "tar.gz"}
-	// t := tar.New(utility.RandomString(6), "tar.gz", "")
-	// t := tar.New("HFfiAW", "tar.gz", "")
-	// err := t.Tar([]string{filepath.Join("portfolio", "redo")})
-	// err := t.Untar(filepath.Join("asset", "patch"))
-	// fmt.Println("TAR : >>>", err)
-
-	// s, _ := file.F{P: "aaaa/bbb/c.txt", R: "bbb/c.txt", S: "", I: nil}
-	// s, _ := file.New("asset/patch/redo/rent_jan_mar_2021.pdf", "asset/patch")
-	// fmt.Println(s.RPath())
 
 }

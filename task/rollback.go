@@ -11,50 +11,50 @@ import (
 	"github.com/pnkj-kmr/patch/utility"
 )
 
-// CleanRollbackDir cleans the rollback folder
-func CleanRollbackDir() (err error) {
-	rollback, err := dir.New(LocationRollback)
+// CleanRevokeDir cleans the rollback folder
+func CleanRevokeDir() (err error) {
+	d, err := dir.New(utility.RevokeDirectory)
 	if err != nil {
 		return err
 	}
-	return rollback.Clean()
+	return d.Clean()
 }
 
-// CompressRollbackDir tar a compress backup to folder
-func CompressRollbackDir() (err error) {
-	rollback, err := dir.New(LocationRollback)
+// BackupRevokeDir takes a tar backup from rollback folder
+func BackupRevokeDir() (err error) {
+	d, err := dir.New(utility.RevokeDirectory)
 	if err != nil {
 		return err
 	}
-	upload, err := dir.New(LocationTarFiles)
+	assetDir, err := dir.New(utility.AssetsDirectory)
 	if err != nil {
 		return err
 	}
-	t := tar.New("ROLLBACK"+utility.RandomStringWithTime(0), "tar.gz", upload.Path())
-	return t.Tar([]string{rollback.Path()})
+	t := tar.New("ROLLBACK"+utility.RandomStringWithTime(0), "tar.gz", assetDir.Path())
+	return t.Tar([]string{d.Path()})
 }
 
-// RollbackFrom helps to apply patch to dst
-func RollbackFrom(dst string) (err error) {
+// RollbackFrom helps to take a rollback patch from target folder
+func RollbackFrom(target string) (err error) {
 	start := time.Now()
-	err = CompressRollbackDir() // TODO - rollback backup
-	err = CleanRollbackDir()    // cleaning the dir
+	err = BackupRevokeDir() // backup
+	err = CleanRevokeDir()  // cleaning the dir
 	if err != nil {
 		return err
 	}
-	rollbackPath, err := dir.New(LocationRollback)
+	revokePath, err := dir.New(utility.RevokeDirectory)
 	if err != nil {
 		return err
 	}
-	fromDir, err := dir.New(dst)
+	fromDir, err := dir.New(target)
 	if err != nil {
 		return err
 	}
-	patchPath, err := dir.New(LocationPatch)
+	remedyDir, err := dir.New(utility.RemedyDirectory)
 	if err != nil {
 		return
 	}
-	files, err := patchPath.Scan()
+	files, err := remedyDir.Scan()
 	if err != nil {
 		return
 	}
@@ -65,12 +65,12 @@ func RollbackFrom(dst string) (err error) {
 			continue
 		}
 		if len(file.SPath()) > 0 {
-			err = rollbackPath.Create(file.SPath())
+			err = revokePath.Create(file.SPath())
 			if err != nil {
 				log.Println("Rollback: ", err)
 				continue
 			}
-			dstInfo, e := dir.New(filepath.Join(rollbackPath.Path(), file.SPath()))
+			dstInfo, e := dir.New(filepath.Join(revokePath.Path(), file.SPath()))
 			if e != nil {
 				log.Println("Rollback: ", err)
 				continue
@@ -81,7 +81,7 @@ func RollbackFrom(dst string) (err error) {
 				continue
 			}
 		} else {
-			err = file.Copy(rollbackPath)
+			err = file.Copy(revokePath)
 			if err != nil {
 				log.Println("Rollback: ", err)
 				continue
@@ -93,10 +93,10 @@ func RollbackFrom(dst string) (err error) {
 }
 
 // VerifyRollback helps to verify the applied rollback
-func VerifyRollback(dst string) (dmap map[string]bool, err error) {
+func VerifyRollback(target string) (dmap map[string]bool, err error) {
 	start := time.Now()
 	dmap = make(map[string]bool)
-	src, err := dir.New(LocationRollback)
+	src, err := dir.New(utility.RevokeDirectory)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func VerifyRollback(dst string) (dmap map[string]bool, err error) {
 	}
 	var match bool
 	for _, file := range files {
-		dstInfo, e := dir.New(filepath.Join(dst, file.RPath()))
+		dstInfo, e := dir.New(filepath.Join(target, file.RPath()))
 		if e != nil {
 			break
 		}
@@ -116,7 +116,7 @@ func VerifyRollback(dst string) (dmap map[string]bool, err error) {
 			break
 		}
 	}
-	dmap[dst] = match
+	dmap[target] = match
 
 	log.Println("Value:", dmap)
 	log.Println("Check: TIME   ", time.Since(start))

@@ -1,6 +1,7 @@
 web
-asset/patch
-asset/revoke
+assets
+revoke
+remedy
 **/*.tar*
 tmp*
 .DS_Store

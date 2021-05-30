@@ -9,11 +9,11 @@ import (
 )
 
 // CheckRights helps to check read/write at given targets
-func CheckRights(dst []string) (dmap map[string]bool, err error) {
+func CheckRights(targets []string) (dmap map[string]bool, err error) {
 	start := time.Now()
 	dmap = make(map[string]bool)
 	randomStr := utility.RandomString(10)
-	for _, d := range dst {
+	for _, d := range targets {
 		var match bool
 		dst, err := dir.New(d)
 		if err == nil {

@@ -8,42 +8,43 @@ import (
 
 	"github.com/pnkj-kmr/patch/module/dir"
 	"github.com/pnkj-kmr/patch/module/tar"
+	"github.com/pnkj-kmr/patch/utility"
 )
 
-// CleanPatchDir cleans the patch folder
-func CleanPatchDir() (err error) {
-	patchDir, err := dir.New(LocationPatch)
+// CleanRemedyDir cleans the patch folder
+func CleanRemedyDir() (err error) {
+	d, err := dir.New(utility.RemedyDirectory)
 	if err != nil {
 		return err
 	}
-	return patchDir.Clean()
+	return d.Clean()
 }
 
-// ExtractIntoPatchDir helps to extract tar file into patch folder
-func ExtractIntoPatchDir(t *tar.T) (err error) {
-	err = CleanPatchDir()
+// ExtractIntoRemedyDir helps to extract tar file into patch folder
+func ExtractIntoRemedyDir(t *tar.T) (err error) {
+	err = CleanRemedyDir()
 	if err != nil {
 		return
 	}
-	return t.Untar(LocationPatch)
+	return t.Untar(utility.RemedyDirectory)
 }
 
-// ApplyPatchTo helps to apply patch to dst
-func ApplyPatchTo(dst []string) (err error) {
+// ApplyPatchTo helps to apply patch to target folder
+func ApplyPatchTo(targets []string) (err error) {
 	start := time.Now()
 	wg := sync.WaitGroup{}
-	src, err := dir.New(LocationPatch)
+	src, err := dir.New(utility.RemedyDirectory)
 	if err != nil {
 		return err
 	}
-	wg.Add(len(dst))
-	for _, d := range dst {
-		go func(dst string) {
-			err := src.Copy(dst)
+	wg.Add(len(targets))
+	for _, d := range targets {
+		go func(target string) {
+			err := src.Copy(target)
 			if err != nil {
-				log.Println("Apply: ERROR  ", dst, err)
+				log.Println("Apply: ERROR  ", target, err)
 			} else {
-				log.Println("Apply: SUCCESS", dst)
+				log.Println("Apply: SUCCESS", target)
 			}
 			wg.Done()
 		}(d)
@@ -54,10 +55,10 @@ func ApplyPatchTo(dst []string) (err error) {
 }
 
 // VerifyPatch helps to verify the applied patch
-func VerifyPatch(dst []string) (dmap map[string]bool, err error) {
+func VerifyPatch(targets []string) (dmap map[string]bool, err error) {
 	start := time.Now()
 	dmap = make(map[string]bool)
-	src, err := dir.New(LocationPatch)
+	src, err := dir.New(utility.RemedyDirectory)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +67,7 @@ func VerifyPatch(dst []string) (dmap map[string]bool, err error) {
 		return
 	}
 	var match bool
-	for _, d := range dst {
+	for _, d := range targets {
 		match = false
 		for _, file := range files {
 			dstInfo, e := dir.New(filepath.Join(d, file.RPath()))

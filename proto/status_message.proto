@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option go_package = "./service/pb";
+
+message Status {
+    bool ok = 1;
+    string descr = 2;
+}
