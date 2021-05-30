@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "./service/pb";
+
+
+message UploadFileRequest {
+    oneof data {
+        FileInfo info = 1;
+        bytes chunk_data = 2;
+    };
+  }
+  
+message FileInfo {
+    string file_name = 1;
+    string file_type = 2;
+}
+  
+message UploadFileResponse {
+    string file_name = 1;
+    uint64 file_size = 2;
+}

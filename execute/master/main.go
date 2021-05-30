@@ -1,11 +1,9 @@
 package main
 
 import (
-	"context"
 	"log"
 
 	"github.com/pnkj-kmr/patch/service"
-	"github.com/pnkj-kmr/patch/service/pb"
 )
 
 func main() {
@@ -19,24 +17,17 @@ func main() {
 	// 	rpc(addr)
 	// }
 
-	clients, err := service.NewRemoteClient()
+	client, err := service.NewRemoteClient()
 	if err != nil {
 		log.Fatal("Remote errors:", err)
 	}
 
-	for _, c := range clients.GetAll() {
-		log.Println("--------c", c)
-		if c.Ok {
-			req := &pb.PingRequest{Msg: "ping"}
-			res, err := c.Client.Ping(context.Background(), req)
-			if err != nil {
-				log.Println("cannot start the server agent ", err)
-			}
-			log.Println(">>>>>> RES <<<<<<", res.GetMsg())
-		} else {
-			log.Println(">>>>> CONNECTION <<<< ", c.Ok, c.Client)
-		}
+	msg := "ping"
+	remoteStat := client.PingToAll(msg)
+	for k, v := range remoteStat {
+		log.Println(">>>>> HOST host:", k, "req:", msg, "res:", v)
 	}
+
 }
 
 // func rpc(addr string) {

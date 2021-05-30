@@ -3,8 +3,10 @@ syntax = "proto3";
 option go_package = "./service/pb";
 
 import "ping_message.proto";
+import "upload_message.proto";
 
 
 service Patch {
-    rpc Ping(PingRequest) returns (PingResponse) {}
+    rpc Ping(PingRequest) returns (PingResponse) {};
+    rpc UploadFile(stream UploadFileRequest) returns (UploadFileResponse) {};
 }
