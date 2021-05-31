@@ -23,7 +23,7 @@ func CheckRights(targets []string) (dmap map[string]bool, err error) {
 				err = dst.Remove(randomStr)
 				// fmt.Println("Folder Delete..", err)
 				if err == nil {
-					err = dst.CreateFile(randomStr)
+					err = dst.CreateFile(randomStr, []byte("temp data into file"))
 					// fmt.Println("File Create..", err)
 					if err == nil {
 						err = dst.RemoveFile(randomStr)

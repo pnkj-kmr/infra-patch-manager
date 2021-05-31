@@ -6,8 +6,9 @@ import (
 	"io"
 	"log"
 
+	"github.com/pnkj-kmr/patch/module/dir"
 	"github.com/pnkj-kmr/patch/service/pb"
-	"github.com/pnkj-kmr/patch/task"
+	"github.com/pnkj-kmr/patch/utility"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -16,13 +17,12 @@ const maxFileSize = 5 * 1 << 20 // 5 MB file - max file
 
 // PatchServer struct to handle the ping service request
 type PatchServer struct {
-	task task.Task
 	pb.UnimplementedPatchServer
 }
 
 // NewPatchServer returns a new ping server
 func NewPatchServer() *PatchServer {
-	return &PatchServer{task.NewPatchTask(), struct{}{}}
+	return &PatchServer{struct{}{}}
 }
 
 func (p *PatchServer) mustEmbedUnimplementedPatchServer() {}
@@ -34,7 +34,7 @@ func (p *PatchServer) Ping(
 ) (res *pb.PingResponse, err error) {
 	msg := req.GetMsg()
 	res = &pb.PingResponse{
-		Msg: p.task.Ping(msg),
+		Msg: utility.Ping(msg),
 	}
 	log.Println("PING: request -", msg, "| response -", res.GetMsg())
 	return
@@ -58,7 +58,7 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 		if err != nil {
 			return err
 		}
-		log.Println("Receiving file data...")
+		// log.Println("Receiving file data...")
 		req, err := stream.Recv()
 		if err == io.EOF {
 			log.Println("No more data")
@@ -83,7 +83,12 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 		}
 	}
 
-	err = p.task.SaveFile(fileName, fileType, fileData)
+	// Writeing the file into directory
+	assetDir, err := dir.New(utility.AssetsDirectory)
+	if err != nil {
+		return logError(status.Errorf(codes.Internal, "cannot save file to assets: %v", err))
+	}
+	fileSizeWritten, err := assetDir.CreateAndWriteFile(fileName+fileType, fileData)
 	if err != nil {
 		return logError(status.Errorf(codes.Internal, "cannot save file to assets: %v", err))
 	}
@@ -97,7 +102,7 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 	if err != nil {
 		return logError(status.Errorf(codes.Unknown, "response error: %v", err))
 	}
-	log.Println("File saved into assets successfully |", fileName, fileSize)
+	log.Println("File saved into assets successfully |", fileName, fileSize, fileSizeWritten, (int64(fileSize) == fileSizeWritten))
 	return
 }
 

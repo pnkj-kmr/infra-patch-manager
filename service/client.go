@@ -6,43 +6,41 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"time"
 
-	"github.com/pnkj-kmr/patch/module"
 	"github.com/pnkj-kmr/patch/module/jsn"
 	"github.com/pnkj-kmr/patch/service/pb"
+	"github.com/pnkj-kmr/patch/utility"
 	"google.golang.org/grpc"
 )
 
-// // Client defines available remotes in the system
-// type Client interface {
-// 	Get(string) ClientInfo
-// 	GetAll() []ClientInfo
-// }
+const (
+	maxFileUploadTime = 5 * time.Second // default timeout for file upload
+	defaultFileExt    = ".tar.gz"       // default file extension
+)
 
 // ClientInfo defines the grpc client with availability status
 type ClientInfo struct {
-	Ok     bool
-	Name   string
-	Client pb.PatchClient
+	Ok   bool
+	Name string
+	pc   pb.PatchClient
 }
 
 // NewClientInfo return client object
 func NewClientInfo(remote jsn.Remote) *ClientInfo {
 	conn, err := grpc.Dial(remote.Address, grpc.WithInsecure())
 	if err != nil {
-		log.Println("Connection dial check:", remote.Address, err)
+		log.Println("Connection dial check for remote:", remote.Address, err)
 		return &ClientInfo{
-			Ok:     false,
-			Name:   remote.Name,
-			Client: pb.NewPatchClient(nil),
+			Ok:   false,
+			Name: remote.Name,
+			pc:   pb.NewPatchClient(nil),
 		}
 	}
 	return &ClientInfo{
-		Ok:     true,
-		Name:   remote.Name,
-		Client: pb.NewPatchClient(conn),
+		Ok:   true,
+		Name: remote.Name,
+		pc:   pb.NewPatchClient(conn),
 	}
 }
 
@@ -50,7 +48,7 @@ func NewClientInfo(remote jsn.Remote) *ClientInfo {
 func (c *ClientInfo) PingTo(in string) (out string) {
 	if c.Ok {
 		req := &pb.PingRequest{Msg: in}
-		res, err := c.Client.Ping(context.Background(), req)
+		res, err := c.pc.Ping(context.Background(), req)
 		if err != nil {
 			log.Println("cannot start the server agent ", err)
 		}
@@ -61,17 +59,18 @@ func (c *ClientInfo) PingTo(in string) (out string) {
 }
 
 // FileUploadTo calls upload file gRPC client
-func (c *ClientInfo) FileUploadTo(f module.I) (fileName string, fileSize uint64, err error) {
-	file, err := os.Open(f.Path())
+func (c *ClientInfo) FileUploadTo(path string) (fileName string, fileSize uint64, err error) {
+	fileName = utility.RandomStringWithTime(0, "PATCH")
+	file, err := os.Open(path)
 	if err != nil {
 		log.Println("cannot open tar file: ", err)
 		return
 	}
 	defer file.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), maxFileUploadTime)
 	defer cancel()
-	stream, err := c.Client.UploadFile(ctx)
+	stream, err := c.pc.UploadFile(ctx)
 	if err != nil {
 		log.Println("cannot upload file: ", err)
 		return
@@ -80,12 +79,11 @@ func (c *ClientInfo) FileUploadTo(f module.I) (fileName string, fileSize uint64,
 	req := &pb.UploadFileRequest{
 		Data: &pb.UploadFileRequest_Info{
 			Info: &pb.FileInfo{
-				FileName: f.Name(),
-				FileType: filepath.Ext(f.Name()),
+				FileName: fileName,
+				FileType: defaultFileExt, // filepath.Ext(path) --> gives .gz if x.tar.gz file
 			},
 		},
 	}
-
 	err = stream.Send(req)
 	if err != nil {
 		log.Println("cannot send file info to server: ", err, stream.RecvMsg(nil))

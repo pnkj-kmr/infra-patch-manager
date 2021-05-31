@@ -30,7 +30,7 @@ func BackupRevokeDir() (err error) {
 	if err != nil {
 		return err
 	}
-	t := tar.New("ROLLBACK"+utility.RandomStringWithTime(0), "tar.gz", assetDir.Path())
+	t := tar.New(utility.RandomStringWithTime(0, "ROLLBACK"), "tar.gz", assetDir.Path())
 	return t.Tar([]string{d.Path()})
 }
 

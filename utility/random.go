@@ -22,10 +22,10 @@ func RandomString(n int) string {
 }
 
 // RandomStringWithTime helps to generate random charactor with n length with time suffix
-func RandomStringWithTime(n int) string {
+func RandomStringWithTime(n int, prefix string) string {
 	b := make([]byte, n)
 	for i := range b {
 		b[i] = letters[rand.Int63()%int64(len(letters))]
 	}
-	return string(b) + "__" + strconv.FormatInt(time.Now().Unix(), 10)
+	return prefix + string(b) + "__" + strconv.FormatInt(time.Now().Unix(), 10)
 }

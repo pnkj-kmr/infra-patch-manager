@@ -2,8 +2,9 @@ package main
 
 import (
 	"log"
+	"path/filepath"
 
-	"github.com/pnkj-kmr/patch/service"
+	"github.com/pnkj-kmr/patch/task"
 )
 
 func main() {
@@ -17,15 +18,21 @@ func main() {
 	// 	rpc(addr)
 	// }
 
-	client, err := service.NewRemoteClient()
+	task, err := task.NewPatchTask()
 	if err != nil {
-		log.Fatal("Remote errors:", err)
+		log.Fatal("task object errors:", err)
 	}
 
 	msg := "ping"
-	remoteStat := client.PingToAll(msg)
+	remoteStat := task.PingToAll(msg)
 	for k, v := range remoteStat {
 		log.Println(">>>>> HOST host:", k, "req:", msg, "res:", v)
+	}
+
+	path := filepath.Join("tmp3/test.tar.gz")
+	result := task.PatchFileUploadToAll(path)
+	for _, r := range result {
+		log.Println("FILE UPLOAD : ", r.Remote, r.File, r.Size, r.Ok, r.Err)
 	}
 
 }
