@@ -7,10 +7,12 @@ import (
 	"log"
 
 	"github.com/pnkj-kmr/patch/module/dir"
+	"github.com/pnkj-kmr/patch/module/tar"
 	"github.com/pnkj-kmr/patch/service/pb"
 	"github.com/pnkj-kmr/patch/utility"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const maxFileSize = 5 * 1 << 20 // 5 MB file - max file
@@ -83,19 +85,51 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 		}
 	}
 
-	// Writeing the file into directory
+	// Assets directory - Default patch hold directory
 	assetDir, err := dir.New(utility.AssetsDirectory)
 	if err != nil {
 		return logError(status.Errorf(codes.Internal, "cannot save file to assets: %v", err))
 	}
+	// Writeing the file into directory
 	fileSizeWritten, err := assetDir.CreateAndWriteFile(fileName+fileType, fileData)
 	if err != nil {
 		return logError(status.Errorf(codes.Internal, "cannot save file to assets: %v", err))
 	}
+	// Patch (remedy) directory
+	remedyDir, err := dir.New(utility.RemedyDirectory)
+	if err != nil {
+		return logError(status.Errorf(codes.Internal, "cannot patch directory.. update config.env file: %v", err))
+	}
+	err = remedyDir.Clean()
+	if err != nil {
+		return logError(status.Errorf(codes.Internal, "Cannot clean patch directory: %v", err))
+	}
+	// untaring the uploaded file
+	t := tar.New(fileName, fileType, utility.AssetsDirectory)
+	err = t.Untar(utility.RemedyDirectory)
+	if err != nil {
+		return logError(status.Errorf(codes.Internal, "Unable to extract file into patch directory: %v", err))
+	}
+	// Scan the remedy dir for all files
+	files, err := remedyDir.Scan()
+	if err != nil {
+		return logError(status.Errorf(codes.Internal, "Unable to scan patch directory: %v", err))
+	}
+	var fileList []*pb.FILE
+	for _, f := range files {
+		fileList = append(fileList, &pb.FILE{
+			Isdir: f.IsDir(),
+			File:  f.Name(),
+			Path:  f.Path(),
+			Size:  f.Size(),
+			Time:  timestamppb.New(f.ModTime()),
+		})
+	}
 
 	res := &pb.UploadFileResponse{
-		FileName: fileName,
-		FileSize: uint64(fileSize),
+		Name: fileName + fileType,
+		Size: uint64(fileSize),
+		Data: fileList,
 	}
 
 	err = stream.SendAndClose(res)

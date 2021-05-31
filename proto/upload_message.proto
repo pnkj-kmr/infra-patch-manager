@@ -2,6 +2,7 @@ syntax = "proto3";
 
 option go_package = "./service/pb";
 
+import "file_message.proto";
 
 message UploadFileRequest {
     oneof data {
@@ -16,6 +17,7 @@ message FileInfo {
 }
   
 message UploadFileResponse {
-    string file_name = 1;
-    uint64 file_size = 2;
+    string name = 1;
+    uint64 size = 2;
+    repeated FILE data = 3;
 }

@@ -27,7 +27,7 @@ func New(name string, ext string, path string) *T {
 
 // TarFilePath represent the full path of tar/tar.gz file
 func (t *T) TarFilePath() string {
-	return filepath.Join(t.Path, t.Name+"."+t.Ext)
+	return filepath.Join(t.Path, t.Name+t.Ext)
 }
 
 // Tar helps to compress the given folder

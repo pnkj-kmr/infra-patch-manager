@@ -33,6 +33,10 @@ func main() {
 	result := task.PatchFileUploadToAll(path)
 	for _, r := range result {
 		log.Println("FILE UPLOAD : ", r.Remote, r.File, r.Size, r.Ok, r.Err)
+		for _, f := range r.Data {
+			// log.Println(f)
+			log.Println("File-- : ", f.GetPath(), f.GetFile(), f.GetSize(), f.GetIsdir(), f.GetTime())
+		}
 	}
 
 }

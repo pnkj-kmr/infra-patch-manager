@@ -59,7 +59,7 @@ func (c *ClientInfo) PingTo(in string) (out string) {
 }
 
 // FileUploadTo calls upload file gRPC client
-func (c *ClientInfo) FileUploadTo(path string) (fileName string, fileSize uint64, err error) {
+func (c *ClientInfo) FileUploadTo(path string) (fileName string, fileSize uint64, fileList []*pb.FILE, err error) {
 	fileName = utility.RandomStringWithTime(0, "PATCH")
 	file, err := os.Open(path)
 	if err != nil {
@@ -100,7 +100,7 @@ func (c *ClientInfo) FileUploadTo(path string) (fileName string, fileSize uint64
 		}
 		if err != nil {
 			log.Println("cannot read chunk to buffer: ", err)
-			return "", 0, err
+			return "", 0, nil, err
 		}
 
 		req := &pb.UploadFileRequest{
@@ -112,18 +112,19 @@ func (c *ClientInfo) FileUploadTo(path string) (fileName string, fileSize uint64
 		err = stream.Send(req)
 		if err != nil {
 			log.Println("cannot send chunk to server: ", err, stream.RecvMsg(nil))
-			return "", 0, err
+			return "", 0, nil, err
 		}
 	}
 
 	res, err := stream.CloseAndRecv()
 	if err != nil {
 		log.Println("cannot receive response: ", err)
-		return "", 0, err
+		return "", 0, nil, err
 	}
 
-	fileName = res.GetFileName()
-	fileSize = res.GetFileSize()
+	fileName = res.GetName()
+	fileSize = res.GetSize()
+	fileList = res.GetData()
 	log.Printf("file uploaded with name: %s, size: %d", fileName, fileSize)
 	return
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/pnkj-kmr/patch/module/dir"
 	"github.com/pnkj-kmr/patch/service"
+	"github.com/pnkj-kmr/patch/service/pb"
 )
 
 // // Task defines all task action/operation functions
@@ -25,6 +26,7 @@ type UploadResult struct {
 	Remote string
 	File   string
 	Size   uint64
+	Data   []*pb.FILE
 	Ok     bool
 	Err    error
 }
@@ -64,7 +66,7 @@ func (t *PatchTask) PatchFileUploadTo(remote, path string) (uFile string, err er
 	if err != nil {
 		return "", err
 	}
-	uFile, uSize, err := c.FileUploadTo(file.Path())
+	uFile, uSize, _, err := c.FileUploadTo(file.Path())
 	if uSize != uint64(file.Size()) {
 		return uFile, fmt.Errorf("Uploaded file size does not match: uploaded :%d | given: %d", file.Size(), uSize)
 	}
@@ -97,7 +99,7 @@ func (t *PatchTask) PatchFileUploadToAll(path string) (out map[string]*UploadRes
 			}
 			continue
 		}
-		uFile, uSize, err := c.FileUploadTo(file.Path())
+		uFile, uSize, uList, err := c.FileUploadTo(file.Path())
 		if err != nil {
 			uFile = ""
 			out[c.Name] = &UploadResult{
@@ -123,6 +125,7 @@ func (t *PatchTask) PatchFileUploadToAll(path string) (out map[string]*UploadRes
 			Remote: c.Name,
 			File:   uFile,
 			Size:   uSize,
+			Data:   uList,
 			Ok:     c.Ok,
 			Err:    err,
 		}
