@@ -15,15 +15,15 @@ import (
 )
 
 const (
-	maxFileUploadTime = 5 * time.Second // default timeout for file upload
+	maxSessionTimeout = 5 * time.Second // default timeout for file upload
 	defaultFileExt    = ".tar.gz"       // default file extension
 )
 
 // ClientInfo defines the grpc client with availability status
 type ClientInfo struct {
-	Ok   bool
-	Name string
-	pc   pb.PatchClient
+	Ok     bool
+	Remote jsn.Remote
+	pc     pb.PatchClient
 }
 
 // NewClientInfo return client object
@@ -32,20 +32,20 @@ func NewClientInfo(remote jsn.Remote) *ClientInfo {
 	if err != nil {
 		log.Println("Connection dial check for remote:", remote.Address, err)
 		return &ClientInfo{
-			Ok:   false,
-			Name: remote.Name,
-			pc:   pb.NewPatchClient(nil),
+			Ok:     false,
+			Remote: remote,
+			pc:     pb.NewPatchClient(nil),
 		}
 	}
 	return &ClientInfo{
-		Ok:   true,
-		Name: remote.Name,
-		pc:   pb.NewPatchClient(conn),
+		Ok:     true,
+		Remote: remote,
+		pc:     pb.NewPatchClient(conn),
 	}
 }
 
-// PingTo calls the gRPC client
-func (c *ClientInfo) PingTo(in string) (out string) {
+// Ping calls the gRPC client
+func (c *ClientInfo) Ping(in string) (out string) {
 	if c.Ok {
 		req := &pb.PingRequest{Msg: in}
 		res, err := c.pc.Ping(context.Background(), req)
@@ -58,9 +58,9 @@ func (c *ClientInfo) PingTo(in string) (out string) {
 	return
 }
 
-// FileUploadTo calls upload file gRPC client
-func (c *ClientInfo) FileUploadTo(path string) (fileName string, fileSize uint64, fileList []*pb.FILE, err error) {
-	fileName = utility.RandomStringWithTime(0, "PATCH")
+// UploadFile calls upload file gRPC client
+func (c *ClientInfo) UploadFile(path string) (res *pb.UploadFileResponse, err error) {
+	fileName := utility.RandomStringWithTime(0, "PATCH")
 	file, err := os.Open(path)
 	if err != nil {
 		log.Println("cannot open tar file: ", err)
@@ -68,7 +68,7 @@ func (c *ClientInfo) FileUploadTo(path string) (fileName string, fileSize uint64
 	}
 	defer file.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), maxFileUploadTime)
+	ctx, cancel := context.WithTimeout(context.Background(), maxSessionTimeout)
 	defer cancel()
 	stream, err := c.pc.UploadFile(ctx)
 	if err != nil {
@@ -100,7 +100,7 @@ func (c *ClientInfo) FileUploadTo(path string) (fileName string, fileSize uint64
 		}
 		if err != nil {
 			log.Println("cannot read chunk to buffer: ", err)
-			return "", 0, nil, err
+			return nil, err
 		}
 
 		req := &pb.UploadFileRequest{
@@ -112,19 +112,39 @@ func (c *ClientInfo) FileUploadTo(path string) (fileName string, fileSize uint64
 		err = stream.Send(req)
 		if err != nil {
 			log.Println("cannot send chunk to server: ", err, stream.RecvMsg(nil))
-			return "", 0, nil, err
+			return nil, err
 		}
 	}
 
-	res, err := stream.CloseAndRecv()
+	res, err = stream.CloseAndRecv()
 	if err != nil {
 		log.Println("cannot receive response: ", err)
-		return "", 0, nil, err
+		return
 	}
+	log.Printf("file uploaded with name: %s, size: %d", res.GetName(), res.GetSize())
+	return
+}
 
-	fileName = res.GetName()
-	fileSize = res.GetSize()
-	fileList = res.GetData()
-	log.Printf("file uploaded with name: %s, size: %d", fileName, fileSize)
+// ApplyPatch sending a patch request to remote server
+func (c *ClientInfo) ApplyPatch(apps []string) (out []*pb.ApplyPatchResponse, err error) {
+	log.Print("apply patch to remote apps: ", apps)
+	ctx, cancel := context.WithTimeout(context.Background(), maxSessionTimeout)
+	defer cancel()
+
+	req := &pb.ApplyPatchRequest{RemoteApps: apps}
+	stream, err := c.pc.ApplyPatch(ctx, req)
+	if err != nil {
+		return
+	}
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return out, err
+		}
+		out = append(out, res)
+	}
 	return
 }

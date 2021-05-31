@@ -18,8 +18,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PatchClient interface {
+	// unary rpc
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
+	// client streaming rpc
 	UploadFile(ctx context.Context, opts ...grpc.CallOption) (Patch_UploadFileClient, error)
+	// server streaming rpc
+	ApplyPatch(ctx context.Context, in *ApplyPatchRequest, opts ...grpc.CallOption) (Patch_ApplyPatchClient, error)
 }
 
 type patchClient struct {
@@ -73,12 +77,48 @@ func (x *patchUploadFileClient) CloseAndRecv() (*UploadFileResponse, error) {
 	return m, nil
 }
 
+func (c *patchClient) ApplyPatch(ctx context.Context, in *ApplyPatchRequest, opts ...grpc.CallOption) (Patch_ApplyPatchClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Patch_ServiceDesc.Streams[1], "/Patch/ApplyPatch", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &patchApplyPatchClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Patch_ApplyPatchClient interface {
+	Recv() (*ApplyPatchResponse, error)
+	grpc.ClientStream
+}
+
+type patchApplyPatchClient struct {
+	grpc.ClientStream
+}
+
+func (x *patchApplyPatchClient) Recv() (*ApplyPatchResponse, error) {
+	m := new(ApplyPatchResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // PatchServer is the server API for Patch service.
 // All implementations must embed UnimplementedPatchServer
 // for forward compatibility
 type PatchServer interface {
+	// unary rpc
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
+	// client streaming rpc
 	UploadFile(Patch_UploadFileServer) error
+	// server streaming rpc
+	ApplyPatch(*ApplyPatchRequest, Patch_ApplyPatchServer) error
 	mustEmbedUnimplementedPatchServer()
 }
 
@@ -91,6 +131,9 @@ func (UnimplementedPatchServer) Ping(context.Context, *PingRequest) (*PingRespon
 }
 func (UnimplementedPatchServer) UploadFile(Patch_UploadFileServer) error {
 	return status.Errorf(codes.Unimplemented, "method UploadFile not implemented")
+}
+func (UnimplementedPatchServer) ApplyPatch(*ApplyPatchRequest, Patch_ApplyPatchServer) error {
+	return status.Errorf(codes.Unimplemented, "method ApplyPatch not implemented")
 }
 func (UnimplementedPatchServer) mustEmbedUnimplementedPatchServer() {}
 
@@ -149,6 +192,27 @@ func (x *patchUploadFileServer) Recv() (*UploadFileRequest, error) {
 	return m, nil
 }
 
+func _Patch_ApplyPatch_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ApplyPatchRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(PatchServer).ApplyPatch(m, &patchApplyPatchServer{stream})
+}
+
+type Patch_ApplyPatchServer interface {
+	Send(*ApplyPatchResponse) error
+	grpc.ServerStream
+}
+
+type patchApplyPatchServer struct {
+	grpc.ServerStream
+}
+
+func (x *patchApplyPatchServer) Send(m *ApplyPatchResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Patch_ServiceDesc is the grpc.ServiceDesc for Patch service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -166,6 +230,11 @@ var Patch_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "UploadFile",
 			Handler:       _Patch_UploadFile_Handler,
 			ClientStreams: true,
+		},
+		{
+			StreamName:    "ApplyPatch",
+			Handler:       _Patch_ApplyPatch_Handler,
+			ServerStreams: true,
 		},
 	},
 	Metadata: "patch_service.proto",

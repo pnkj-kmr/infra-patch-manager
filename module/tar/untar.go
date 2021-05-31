@@ -78,5 +78,6 @@ func (t *T) Untar(extractPath string) (err error) {
 			log.Println("ERROR : ", header.Typeflag, filename)
 		}
 	}
+	log.Println("UNTAR: ", t.TarFilePath(), extractPath)
 	return nil
 }

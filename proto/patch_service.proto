@@ -4,9 +4,14 @@ option go_package = "./service/pb";
 
 import "ping_message.proto";
 import "upload_message.proto";
+import "apply_message.proto";
 
 
 service Patch {
+    // unary rpc
     rpc Ping(PingRequest) returns (PingResponse) {};
+    // client streaming rpc
     rpc UploadFile(stream UploadFileRequest) returns (UploadFileResponse) {};
+    // server streaming rpc
+    rpc ApplyPatch(ApplyPatchRequest) returns (stream ApplyPatchResponse) {};
 }

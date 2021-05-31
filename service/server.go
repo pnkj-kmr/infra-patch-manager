@@ -5,14 +5,13 @@ import (
 	"context"
 	"io"
 	"log"
+	"strconv"
 
-	"github.com/pnkj-kmr/patch/module/dir"
-	"github.com/pnkj-kmr/patch/module/tar"
+	"github.com/pnkj-kmr/patch/service/action"
 	"github.com/pnkj-kmr/patch/service/pb"
 	"github.com/pnkj-kmr/patch/utility"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const maxFileSize = 5 * 1 << 20 // 5 MB file - max file
@@ -30,10 +29,7 @@ func NewPatchServer() *PatchServer {
 func (p *PatchServer) mustEmbedUnimplementedPatchServer() {}
 
 // Ping defines the PING-PONG
-func (p *PatchServer) Ping(
-	ctx context.Context,
-	req *pb.PingRequest,
-) (res *pb.PingResponse, err error) {
+func (p *PatchServer) Ping(ctx context.Context, req *pb.PingRequest) (res *pb.PingResponse, err error) {
 	msg := req.GetMsg()
 	res = &pb.PingResponse{
 		Msg: utility.Ping(msg),
@@ -85,46 +81,8 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 		}
 	}
 
-	// Assets directory - Default patch hold directory
-	assetDir, err := dir.New(utility.AssetsDirectory)
-	if err != nil {
-		return logError(status.Errorf(codes.Internal, "cannot save file to assets: %v", err))
-	}
-	// Writeing the file into directory
-	fileSizeWritten, err := assetDir.CreateAndWriteFile(fileName+fileType, fileData)
-	if err != nil {
-		return logError(status.Errorf(codes.Internal, "cannot save file to assets: %v", err))
-	}
-	// Patch (remedy) directory
-	remedyDir, err := dir.New(utility.RemedyDirectory)
-	if err != nil {
-		return logError(status.Errorf(codes.Internal, "cannot patch directory.. update config.env file: %v", err))
-	}
-	err = remedyDir.Clean()
-	if err != nil {
-		return logError(status.Errorf(codes.Internal, "Cannot clean patch directory: %v", err))
-	}
-	// untaring the uploaded file
-	t := tar.New(fileName, fileType, utility.AssetsDirectory)
-	err = t.Untar(utility.RemedyDirectory)
-	if err != nil {
-		return logError(status.Errorf(codes.Internal, "Unable to extract file into patch directory: %v", err))
-	}
-	// Scan the remedy dir for all files
-	files, err := remedyDir.Scan()
-	if err != nil {
-		return logError(status.Errorf(codes.Internal, "Unable to scan patch directory: %v", err))
-	}
-	var fileList []*pb.FILE
-	for _, f := range files {
-		fileList = append(fileList, &pb.FILE{
-			Isdir: f.IsDir(),
-			File:  f.Name(),
-			Path:  f.Path(),
-			Size:  f.Size(),
-			Time:  timestamppb.New(f.ModTime()),
-		})
-	}
+	// post actions - file save, untar, dir scan
+	fileList, fileSizeWritten, err := action.PostActionAfterUploadFile(fileName, fileType, fileData)
 
 	res := &pb.UploadFileResponse{
 		Name: fileName + fileType,
@@ -140,20 +98,41 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 	return
 }
 
-func contextError(ctx context.Context) error {
-	switch ctx.Err() {
-	case context.Canceled:
-		return logError(status.Error(codes.Canceled, "canceled by sender"))
-	case context.DeadlineExceeded:
-		return logError(status.Error(codes.DeadlineExceeded, "deadline is exceeded"))
-	default:
+// ApplyPatch helps to apply patch at given remote applications with server-streaming
+func (p *PatchServer) ApplyPatch(req *pb.ApplyPatchRequest, stream pb.Patch_ApplyPatchServer) (err error) {
+	apps := req.GetRemoteApps()
+	log.Printf("receive a request with apps: %v", apps)
+
+	found := func(r string, v bool, d []*pb.FILE) error {
+		res := &pb.ApplyPatchResponse{
+			RemoteApp: r, Verified: v, Data: d,
+		}
+		err := stream.Send(res)
+		if err != nil {
+			return err
+		}
+		log.Printf("sending remote app: %s - verified: %s", res.GetRemoteApp(), strconv.FormatBool(res.GetVerified()))
 		return nil
 	}
-}
 
-func logError(err error) error {
-	if err != nil {
-		log.Print(err)
+	for i, path := range apps {
+		// checking upload is cancel by send
+		err := contextError(stream.Context())
+		if err != nil {
+			return err
+		}
+		err = action.ApplyPatchTo(path, i == 0)
+		if err != nil {
+			return err
+		}
+		files, verified, err := action.VerifyPatch(path)
+		if err != nil {
+			return err
+		}
+		err = found(path, verified, files)
+		if err != nil {
+			return err
+		}
 	}
-	return err
+	return
 }

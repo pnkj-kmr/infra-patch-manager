@@ -1,4 +1,4 @@
-package task
+package action
 
 import (
 	"log"
@@ -93,18 +93,16 @@ func RollbackFrom(target string) (err error) {
 }
 
 // VerifyRollback helps to verify the applied rollback
-func VerifyRollback(target string) (dmap map[string]bool, err error) {
+func VerifyRollback(target string) (match bool, err error) {
 	start := time.Now()
-	dmap = make(map[string]bool)
 	src, err := dir.New(utility.RevokeDirectory)
 	if err != nil {
-		return nil, err
+		return
 	}
 	files, err := src.Scan()
 	if err != nil {
 		return
 	}
-	var match bool
 	for _, file := range files {
 		dstInfo, e := dir.New(filepath.Join(target, file.RPath()))
 		if e != nil {
@@ -116,9 +114,7 @@ func VerifyRollback(target string) (dmap map[string]bool, err error) {
 			break
 		}
 	}
-	dmap[target] = match
-
-	log.Println("Value:", dmap)
+	log.Println("Value:", match)
 	log.Println("Check: TIME   ", time.Since(start))
 	return
 }

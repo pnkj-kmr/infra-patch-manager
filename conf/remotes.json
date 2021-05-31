@@ -6,13 +6,13 @@
             {
                 "apptype": "dc",
                 "name": "remote1-app1",
-                "path": "./tmp/app1",
+                "path": "./tmp/app1-1",
                 "service": "app1"
             },
             {
                 "apptype": "dc",
                 "name": "remote1-app2",
-                "path": "./tmp/app2",
+                "path": "./tmp/app1-2",
                 "service": "app2"
             }
         ]
@@ -24,7 +24,7 @@
             {
                 "app_type": "app",
                 "name": "remote-2-app2",
-                "path": "./tmp2/app1",
+                "path": "./tmp/app2-1",
                 "service": "app1"
             }
         ]

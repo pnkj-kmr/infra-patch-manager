@@ -38,9 +38,9 @@ func (r *RemoteConfig) Get(remote string) *ClientInfo {
 	if !ok {
 		log.Println("Remote not exists:", remote, site)
 		return &ClientInfo{
-			Ok:   false,
-			Name: remote,
-			pc:   pb.NewPatchClient(nil),
+			Ok:     false,
+			Remote: jsn.Remote{Name: remote},
+			pc:     pb.NewPatchClient(nil),
 		}
 	}
 	return NewClientInfo(site)
