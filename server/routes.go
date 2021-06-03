@@ -20,10 +20,11 @@ func PublicRoutes(a *fiber.App) {
 	// Create routes group.
 	route := a.Group("/api")
 
-	route.Get(endpoints.APIGetStatus, endpoints.GetStatus)      // status check
-	route.Get(endpoints.APIGetRemotes, endpoints.GetRemoteList) // remote list
-	route.Get(endpoints.APIGetRemote, endpoints.GetRemote)      // remote search by name
-	route.Get(endpoints.APIGetRemotesRights, endpoints.CheckRemoteRights)
+	route.Get(endpoints.APIGetStatus, endpoints.GetStatus)                 // status check
+	route.Get(endpoints.APIGetRemotes, endpoints.GetRemoteList)            // remote list
+	route.Get(endpoints.APIGetRemote, endpoints.GetRemote)                 // remote search by name
+	route.Get(endpoints.APIGetRemotesRights, endpoints.CheckRemotesRights) // remotes rights
+	route.Get(endpoints.APIGetRemoteRights, endpoints.CheckRemoteRights)   // remote rights by name
 }
 
 // // PrivateRoutes func for describe group of private routes.

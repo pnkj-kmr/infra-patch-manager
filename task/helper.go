@@ -12,5 +12,6 @@ func isAppExistsInRemote(r jsn.Remote, apppath string) (out jsn.RemoteApp, err e
 			return app, nil
 		}
 	}
-	return jsn.RemoteApp{Path: apppath, Status: false}, status.Error(codes.InvalidArgument, "App does not exist in remote")
+	err = status.Error(codes.InvalidArgument, "App does not exist in remote")
+	return jsn.RemoteApp{Path: apppath, Status: jsn.RemoteStatus{Ok: false, Err: err}}, err
 }

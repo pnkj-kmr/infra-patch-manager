@@ -83,7 +83,7 @@ func (c *ClientInfo) RightsCheck(apps []jsn.RemoteApp) (out []jsn.RemoteApp, err
 			Name:    app.GetName(),
 			Path:    app.GetPath(),
 			Service: app.GetService(),
-			Status:  appinfo.GetHasRights(),
+			Status:  jsn.RemoteStatus{Ok: appinfo.GetHasRights()},
 		})
 	}
 	return

@@ -9,4 +9,6 @@ const (
 	APIGetRemote = "/remote/:name"
 	// APIGetRemotesRights remotes list with rights check
 	APIGetRemotesRights = "/remotes/rights"
+	// APIGetRemoteRights fetch remote rights by name
+	APIGetRemoteRights = "/remote/:name/rights"
 )

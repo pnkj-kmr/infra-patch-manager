@@ -7,63 +7,37 @@ import (
 )
 
 // RightsCheckFor defines the grpc
-func (t *PatchTask) RightsCheckFor(remote, app string) (out jsn.Remote) {
-	c := t.r.Get(remote)
-	log.Println(c.Remote.Name, "RIGHTS: sending request with data -", remote, app)
-	rApp, err := isAppExistsInRemote(c.Remote, app)
-	if err != nil {
-		log.Println(c.Remote.Name, "RIGHTS: error -", err)
-		c.Remote.Apps = []jsn.RemoteApp{rApp}
-		return c.Remote
-	}
-	res, err := c.RightsCheck([]jsn.RemoteApp{rApp})
-	if err != nil {
-		log.Println(c.Remote.Name, "RIGHTS: error -", err)
-		c.Remote.Apps = []jsn.RemoteApp{rApp}
-		return c.Remote
-	}
-	log.Println(c.Remote.Name, "RIGHTS: success -", err)
-	c.Remote.Apps = res
-	return c.Remote
-}
-
-// RightsCheckForApps defines the grpc
-func (t *PatchTask) RightsCheckForApps(remote string, apps []string) (out jsn.Remote) {
+func (t *PatchTask) RightsCheckFor(remote string, apps []string) jsn.Remote {
 	c := t.r.Get(remote)
 	log.Println(c.Remote.Name, "RIGHTS: sending request with data -", remote, apps)
 	var targetApps []jsn.RemoteApp
+	var notExistsApps []jsn.RemoteApp
 	for _, app := range apps {
 		rApp, err := isAppExistsInRemote(c.Remote, app)
 		if err != nil {
 			log.Println(c.Remote.Name, "RIGHTS: error -", err)
-			c.Remote.Apps = []jsn.RemoteApp{rApp}
-			return c.Remote
+			notExistsApps = append(notExistsApps, rApp)
+			continue
 		}
 		targetApps = append(targetApps, rApp)
 	}
 	res, err := c.RightsCheck(targetApps)
 	if err != nil {
 		log.Println(c.Remote.Name, "RIGHTS: error -", err)
-		c.Remote.Apps = targetApps
-		return c.Remote
+		return jsn.Remote{
+			Name:    c.Remote.Name,
+			Address: c.Remote.Address,
+			Status:  jsn.RemoteStatus{Ok: false, Err: err},
+			Apps:    append(targetApps, notExistsApps...),
+		}
 	}
 	log.Println(c.Remote.Name, "RIGHTS: success -", err)
-	c.Remote.Apps = res
-	return c.Remote
-}
-
-// RightsCheckForAllApps defines the grpc
-func (t *PatchTask) RightsCheckForAllApps(remote string) (out jsn.Remote) {
-	c := t.r.Get(remote)
-	log.Println(c.Remote.Name, "RIGHTS: sending request with data -", remote)
-	res, err := c.RightsCheck(c.Remote.Apps)
-	if err != nil {
-		log.Println(c.Remote.Name, "RIGHTS: error -", err)
-		return c.Remote
+	return jsn.Remote{
+		Name:    c.Remote.Name,
+		Address: c.Remote.Address,
+		Status:  jsn.RemoteStatus{Ok: len(notExistsApps) == 0, Err: err},
+		Apps:    append(res, notExistsApps...),
 	}
-	log.Println(c.Remote.Name, "RIGHTS: success -", err)
-	c.Remote.Apps = res
-	return c.Remote
 }
 
 // RightsCheckForAll defines the grpc
@@ -77,7 +51,7 @@ func (t *PatchTask) RightsCheckForAll() (out []jsn.Remote) {
 				Name:    c.Remote.Name,
 				Address: c.Remote.Address,
 				Apps:    c.Remote.Apps,
-				Status:  false,
+				Status:  jsn.RemoteStatus{Ok: false, Err: err},
 			})
 			continue
 		}
@@ -86,7 +60,7 @@ func (t *PatchTask) RightsCheckForAll() (out []jsn.Remote) {
 			Name:    c.Remote.Name,
 			Address: c.Remote.Address,
 			Apps:    res,
-			Status:  true,
+			Status:  jsn.RemoteStatus{Ok: true, Err: err},
 		})
 	}
 	return

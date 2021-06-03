@@ -77,9 +77,50 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "{\"ok\":\"string\", \"msg\": \"string\", \"data\": \"\"}",
                         "schema": {
-                            "$ref": "#/definitions/jsn.Remote"
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/remote/{name}/rights": {
+            "get": {
+                "description": "getting remote rights of read/write",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Patch"
+                ],
+                "summary": "getting remote rights of read/write",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Remote Name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Remote Apps",
+                        "name": "apps",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"ok\":\"string\", \"msg\": \"string\", \"data\": \"\"}",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -100,12 +141,9 @@ var doc = `{
                 "summary": "getting all available remotes",
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "{\"ok\":\"string\", \"msg\": \"string\", \"data\": \"\"}",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/jsn.Remote"
-                            }
+                            "type": "string"
                         }
                     }
                 }
@@ -113,7 +151,7 @@ var doc = `{
         },
         "/api/remotes/rights": {
             "get": {
-                "description": "getting remote rights of read/write",
+                "description": "getting remotes rights of read/write",
                 "consumes": [
                     "application/json"
                 ],
@@ -123,59 +161,14 @@ var doc = `{
                 "tags": [
                     "Patch"
                 ],
-                "summary": "getting remote rights of read/write",
+                "summary": "getting remotes rights of read/write",
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "{\"ok\":\"string\", \"msg\": \"string\", \"data\": \"\"}",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/jsn.Remote"
-                            }
+                            "type": "string"
                         }
                     }
-                }
-            }
-        }
-    },
-    "definitions": {
-        "jsn.Remote": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "apps": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/jsn.RemoteApp"
-                    }
-                },
-                "name": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "jsn.RemoteApp": {
-            "type": "object",
-            "properties": {
-                "apptype": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "service": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "boolean"
                 }
             }
         }
