@@ -4,17 +4,21 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
 )
 
 // Config holds the all configuration variables of application
 // Variables loaded from env file and os env by viber
 type Config struct {
-	RemedyDir string `mapstructure:"DIR_PATCH"`
-	RevokeDir string `mapstructure:"DIR_PATCH_ROLLBACK"`
-	AssetsDir string `mapstructure:"DIR_ASSETS"`
-	Port      string `mapstructure:"PORT"`
+	RemedyDir    string `mapstructure:"DIR_PATCH"`
+	RevokeDir    string `mapstructure:"DIR_PATCH_ROLLBACK"`
+	AssetsDir    string `mapstructure:"DIR_ASSETS"`
+	Port         string `mapstructure:"PORT"`
+	ReadTimeout  int    `mapstructure:"READ_TIMEOUT"`
+	WriteTimeout int    `mapstructure:"WRITE_TIMEOUT"`
 }
 
 // LoadConfig helps to setup configuration from file or env variable
@@ -24,8 +28,8 @@ func LoadConfig() (config Config, err error) {
 		return
 	}
 	// Looks multiple folder to match these files
-	viper.AddConfigPath(filepath.Join(filepath.Dir(wd), "conf"))
-	viper.AddConfigPath(filepath.Join(wd, "conf"))
+	viper.AddConfigPath(filepath.Join(filepath.Dir(wd), ConfDirectory))
+	viper.AddConfigPath(filepath.Join(wd, ConfDirectory))
 	// filename with extensions
 	viper.SetConfigName("config")
 	viper.SetConfigType("env")
@@ -41,4 +45,14 @@ func LoadConfig() (config Config, err error) {
 	log.Println("Config Name:", f)
 	return
 
+}
+
+// FiberConfig func for configuration Fiber app.
+// See: https://docs.gofiber.io/api/fiber#config
+func FiberConfig(c Config) fiber.Config {
+
+	// Return Fiber configuration.
+	return fiber.Config{
+		ReadTimeout: time.Second * time.Duration(c.ReadTimeout),
+	}
 }

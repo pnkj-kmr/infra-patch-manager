@@ -1,0 +1,166 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Patch APIs helps to describe the available routes for patch master server.",
+        "title": "Patch API",
+        "contact": {
+            "name": "PANKAJ KUMAR"
+        },
+        "license": {
+            "name": "MIT Licence",
+            "url": "https://www.github.com/pnkj-kmr/patch/README.md"
+        },
+        "version": "1.0"
+    },
+    "paths": {
+        "/api/check": {
+            "get": {
+                "description": "Endpoint check with formal api call",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Status"
+                ],
+                "summary": "status check api call",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/remote/{name}": {
+            "get": {
+                "description": "searching remote by name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Patch"
+                ],
+                "summary": "searching remote by name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Remote Name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/jsn.Remote"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/remotes": {
+            "get": {
+                "description": "getting all remotes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Patch"
+                ],
+                "summary": "getting all available remotes",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/jsn.Remote"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/remotes/rights": {
+            "get": {
+                "description": "getting remote rights of read/write",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Patch"
+                ],
+                "summary": "getting remote rights of read/write",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/jsn.Remote"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "jsn.Remote": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "apps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/jsn.RemoteApp"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "jsn.RemoteApp": {
+            "type": "object",
+            "properties": {
+                "apptype": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "service": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        }
+    }
+}

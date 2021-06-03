@@ -22,7 +22,7 @@
         "address": "0.0.0.0:8081",
         "apps": [
             {
-                "app_type": "app",
+                "apptype": "app",
                 "name": "remote-2-app2",
                 "path": "./tmp/app2-1",
                 "service": "app1"
@@ -34,7 +34,7 @@
         "address": "0.0.0.0:8083",
         "apps": [
             {
-                "app_type": "app",
+                "apptype": "app",
                 "name": "remote-3-app3",
                 "path": "./tmp3/app3",
                 "service": "app1"

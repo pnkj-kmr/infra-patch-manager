@@ -42,6 +42,6 @@ func copy(src, dst string) (err error) {
 		return
 	}
 	err = out.Sync()
-	log.Println("Copy: SRC:", src, " | DST:", dst)
+	log.Println("COPY: src-", src, "| dst-", dst)
 	return
 }

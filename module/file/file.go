@@ -8,10 +8,10 @@ import (
 
 // F defines the file information
 type F struct {
-	P string
-	R string
-	S string
-	I fs.FileInfo
+	P string      `json:"path"`
+	R string      `json:"relative_path"`
+	S string      `json:"sub_directory"`
+	I fs.FileInfo `json:"info"`
 }
 
 // New creates the file struct

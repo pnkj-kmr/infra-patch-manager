@@ -18,8 +18,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PatchClient interface {
-	// unary rpc
+	// unary rpc - ping status check
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
+	// unary rpc - read/write rights check
+	RightsCheck(ctx context.Context, in *RightsCheckRequest, opts ...grpc.CallOption) (*RightsCheckResponse, error)
 	// client streaming rpc
 	UploadFile(ctx context.Context, opts ...grpc.CallOption) (Patch_UploadFileClient, error)
 	// server streaming rpc
@@ -37,6 +39,15 @@ func NewPatchClient(cc grpc.ClientConnInterface) PatchClient {
 func (c *patchClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error) {
 	out := new(PingResponse)
 	err := c.cc.Invoke(ctx, "/Patch/Ping", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *patchClient) RightsCheck(ctx context.Context, in *RightsCheckRequest, opts ...grpc.CallOption) (*RightsCheckResponse, error) {
+	out := new(RightsCheckResponse)
+	err := c.cc.Invoke(ctx, "/Patch/RightsCheck", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -113,8 +124,10 @@ func (x *patchApplyPatchClient) Recv() (*ApplyPatchResponse, error) {
 // All implementations must embed UnimplementedPatchServer
 // for forward compatibility
 type PatchServer interface {
-	// unary rpc
+	// unary rpc - ping status check
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
+	// unary rpc - read/write rights check
+	RightsCheck(context.Context, *RightsCheckRequest) (*RightsCheckResponse, error)
 	// client streaming rpc
 	UploadFile(Patch_UploadFileServer) error
 	// server streaming rpc
@@ -128,6 +141,9 @@ type UnimplementedPatchServer struct {
 
 func (UnimplementedPatchServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+}
+func (UnimplementedPatchServer) RightsCheck(context.Context, *RightsCheckRequest) (*RightsCheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RightsCheck not implemented")
 }
 func (UnimplementedPatchServer) UploadFile(Patch_UploadFileServer) error {
 	return status.Errorf(codes.Unimplemented, "method UploadFile not implemented")
@@ -162,6 +178,24 @@ func _Patch_Ping_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PatchServer).Ping(ctx, req.(*PingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Patch_RightsCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RightsCheckRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PatchServer).RightsCheck(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Patch/RightsCheck",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PatchServer).RightsCheck(ctx, req.(*RightsCheckRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -223,6 +257,10 @@ var Patch_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Ping",
 			Handler:    _Patch_Ping_Handler,
+		},
+		{
+			MethodName: "RightsCheck",
+			Handler:    _Patch_RightsCheck_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

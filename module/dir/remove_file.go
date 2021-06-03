@@ -10,10 +10,11 @@ import (
 // Returns error if any
 func (d *D) RemoveFile(file string) (err error) {
 	fullPath := filepath.Join(d.Path(), file)
-	log.Println("Remove: FILE: ", fullPath)
 	err = os.Remove(fullPath)
 	if err != nil {
+		log.Println("Cannot remove the file", fullPath, err)
 		return err
 	}
+	log.Println("REMOVE: file -", fullPath)
 	return
 }

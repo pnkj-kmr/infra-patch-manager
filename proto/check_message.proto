@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "./service/pb";
+
+import "app_message.proto";
+
+
+message RightsCheckRequest {
+    repeated APP remote_apps = 1;
+}
+
+message RightsCheckResponse {
+    repeated AppRightsInfo apps = 1;
+}
+
+message AppRightsInfo {
+    APP remote_app = 1;
+    bool has_rights = 2;
+}
+

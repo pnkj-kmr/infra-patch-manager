@@ -50,7 +50,7 @@ func (c *ClientInfo) Ping(in string) (out string) {
 		req := &pb.PingRequest{Msg: in}
 		res, err := c.pc.Ping(context.Background(), req)
 		if err != nil {
-			log.Println("cannot start the server agent ", err)
+			log.Println(c.Remote.Name, "Ping request failed:", err)
 		}
 		out = res.GetMsg()
 		return
@@ -58,12 +58,45 @@ func (c *ClientInfo) Ping(in string) (out string) {
 	return
 }
 
+// RightsCheck calls the gRPC client for read/write check
+func (c *ClientInfo) RightsCheck(apps []jsn.RemoteApp) (out []jsn.RemoteApp, err error) {
+	log.Println(c.Remote.Name, "Rights check receieved for apps", apps)
+	var rApps []*pb.APP
+	for _, app := range apps {
+		rApps = append(rApps, &pb.APP{
+			Name:    app.Name,
+			Path:    app.Path,
+			Service: app.Service,
+		})
+	}
+	req := &pb.RightsCheckRequest{RemoteApps: rApps}
+	res, err := c.pc.RightsCheck(context.Background(), req)
+	if err != nil {
+		log.Println(c.Remote.Name, "Rights check response has error as:", err)
+		return apps, err
+	}
+	resApps := res.GetApps()
+	var app *pb.APP
+	for _, appinfo := range resApps {
+		app = appinfo.GetRemoteApp()
+		out = append(out, jsn.RemoteApp{
+			Name:    app.GetName(),
+			Path:    app.GetPath(),
+			Service: app.GetService(),
+			Status:  appinfo.GetHasRights(),
+		})
+	}
+	return
+}
+
 // UploadFile calls upload file gRPC client
 func (c *ClientInfo) UploadFile(path string) (res *pb.UploadFileResponse, err error) {
+	log.Println(c.Remote.Name, "Patch file upload request received", path)
 	fileName := utility.RandomStringWithTime(0, "PATCH")
 	file, err := os.Open(path)
 	if err != nil {
 		log.Println("cannot open tar file: ", err)
+		log.Println(c.Remote.Name, "Unable to open the given path file", path, err)
 		return
 	}
 	defer file.Close()
@@ -72,7 +105,7 @@ func (c *ClientInfo) UploadFile(path string) (res *pb.UploadFileResponse, err er
 	defer cancel()
 	stream, err := c.pc.UploadFile(ctx)
 	if err != nil {
-		log.Println("cannot upload file: ", err)
+		log.Println(c.Remote.Name, "Unable to open the path file", err)
 		return
 	}
 
@@ -86,7 +119,7 @@ func (c *ClientInfo) UploadFile(path string) (res *pb.UploadFileResponse, err er
 	}
 	err = stream.Send(req)
 	if err != nil {
-		log.Println("cannot send file info to server: ", err, stream.RecvMsg(nil))
+		log.Println(c.Remote.Name, "Cannot send file info to server", err, stream.RecvMsg(nil))
 		return
 	}
 
@@ -99,7 +132,7 @@ func (c *ClientInfo) UploadFile(path string) (res *pb.UploadFileResponse, err er
 			break
 		}
 		if err != nil {
-			log.Println("cannot read chunk to buffer: ", err)
+			log.Println(c.Remote.Name, "cannot read chunk to buffer", err)
 			return nil, err
 		}
 
@@ -111,29 +144,30 @@ func (c *ClientInfo) UploadFile(path string) (res *pb.UploadFileResponse, err er
 
 		err = stream.Send(req)
 		if err != nil {
-			log.Println("cannot send chunk to server: ", err, stream.RecvMsg(nil))
+			log.Println(c.Remote.Name, "cannot send chunk to server", err, stream.RecvMsg(nil))
 			return nil, err
 		}
 	}
 
 	res, err = stream.CloseAndRecv()
 	if err != nil {
-		log.Println("cannot receive response: ", err)
+		log.Println(c.Remote.Name, "Upload file receieve response failed", err)
 		return
 	}
-	log.Printf("file uploaded with name: %s, size: %d", res.GetName(), res.GetSize())
+	log.Println(c.Remote.Name, "File uploaded :", res.GetName(), ", size: ", res.GetSize())
 	return
 }
 
 // ApplyPatch sending a patch request to remote server
 func (c *ClientInfo) ApplyPatch(apps []string) (out []*pb.ApplyPatchResponse, err error) {
-	log.Print("apply patch to remote apps: ", apps)
+	log.Println(c.Remote.Name, "Apply patch receieved for apps", apps)
 	ctx, cancel := context.WithTimeout(context.Background(), maxSessionTimeout)
 	defer cancel()
 
 	req := &pb.ApplyPatchRequest{RemoteApps: apps}
 	stream, err := c.pc.ApplyPatch(ctx, req)
 	if err != nil {
+		log.Println(c.Remote.Name, "Cannot send apply patch request to server", err)
 		return
 	}
 	for {
@@ -142,6 +176,7 @@ func (c *ClientInfo) ApplyPatch(apps []string) (out []*pb.ApplyPatchResponse, er
 			break
 		}
 		if err != nil {
+			log.Println(c.Remote.Name, "Cannot receieve stream data from server", err)
 			return out, err
 		}
 		out = append(out, res)

@@ -38,6 +38,26 @@ func (p *PatchServer) Ping(ctx context.Context, req *pb.PingRequest) (res *pb.Pi
 	return
 }
 
+// RightsCheck helps to verify the target folder read/write rights
+func (p *PatchServer) RightsCheck(ctx context.Context, req *pb.RightsCheckRequest) (res *pb.RightsCheckResponse, err error) {
+	apps := req.GetRemoteApps()
+	log.Println("Rights check request receieved for apps", apps)
+
+	checkApps := make([]*pb.AppRightsInfo, len(apps))
+	for i, app := range apps {
+		match, err := action.RemoteRWRights(app.GetPath())
+		if err != nil {
+			log.Println("Rights check error", err)
+		}
+		checkApps[i] = &pb.AppRightsInfo{
+			RemoteApp: app,
+			HasRights: match,
+		}
+	}
+	res = &pb.RightsCheckResponse{Apps: checkApps}
+	return
+}
+
 // UploadFile uploads the file data to server(remote) with client streaming rpc
 func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 	req, err := stream.Recv()
@@ -46,7 +66,7 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 	}
 	fileName := req.GetInfo().GetFileName()
 	fileType := req.GetInfo().GetFileType()
-	log.Println("UPLOAD: files info ", fileName, fileType)
+	log.Println("UPLOAD: files info received", fileName, fileType)
 
 	fileData := bytes.Buffer{}
 	fileSize := 0
@@ -59,7 +79,7 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 		// log.Println("Receiving file data...")
 		req, err := stream.Recv()
 		if err == io.EOF {
-			log.Println("No more data")
+			log.Println("UPLOAD: No more data")
 			break
 		}
 		if err != nil {
@@ -83,6 +103,9 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 
 	// post actions - file save, untar, dir scan
 	fileList, fileSizeWritten, err := action.PostActionAfterUploadFile(fileName, fileType, fileData)
+	if err != nil {
+		return
+	}
 
 	res := &pb.UploadFileResponse{
 		Name: fileName + fileType,
@@ -92,16 +115,16 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 
 	err = stream.SendAndClose(res)
 	if err != nil {
-		return logError(status.Errorf(codes.Unknown, "response error: %v", err))
+		return logError(status.Errorf(codes.Unknown, "cannot sent file upload response: %v", err))
 	}
-	log.Println("File saved into assets successfully |", fileName, fileSize, fileSizeWritten, (int64(fileSize) == fileSizeWritten))
+	log.Println("File uploaded |", fileName, fileSize, fileSizeWritten, (int64(fileSize) == fileSizeWritten))
 	return
 }
 
 // ApplyPatch helps to apply patch at given remote applications with server-streaming
 func (p *PatchServer) ApplyPatch(req *pb.ApplyPatchRequest, stream pb.Patch_ApplyPatchServer) (err error) {
 	apps := req.GetRemoteApps()
-	log.Printf("receive a request with apps: %v", apps)
+	log.Println("Apply patch request receieved for apps", apps)
 
 	found := func(r string, v bool, d []*pb.FILE) error {
 		res := &pb.ApplyPatchResponse{
@@ -109,9 +132,9 @@ func (p *PatchServer) ApplyPatch(req *pb.ApplyPatchRequest, stream pb.Patch_Appl
 		}
 		err := stream.Send(res)
 		if err != nil {
-			return err
+			return logError(status.Errorf(codes.Unknown, "cannot sent data: %v", err))
 		}
-		log.Printf("sending remote app: %s - verified: %s", res.GetRemoteApp(), strconv.FormatBool(res.GetVerified()))
+		log.Println("PATCH applied for remote app:", res.GetRemoteApp(), ", Verified patch:", strconv.FormatBool(res.GetVerified()))
 		return nil
 	}
 

@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option go_package = "./service/pb";
+
+message APP {
+    string name = 1;
+    string path = 2;
+    string service = 3;
+
+}

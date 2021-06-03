@@ -2,6 +2,8 @@ package action
 
 import (
 	"bytes"
+	"log"
+	"time"
 
 	"github.com/pnkj-kmr/patch/module/dir"
 	"github.com/pnkj-kmr/patch/module/tar"
@@ -15,7 +17,7 @@ import (
 func CleanRemedyDir() (err error) {
 	d, err := dir.New(utility.RemedyDirectory)
 	if err != nil {
-		return logError(status.Errorf(codes.Internal, "Cannot clean patch directory: %v", err))
+		return logError(status.Errorf(codes.Internal, "Cannot find default patch folder: %v | %v", utility.RemedyDirectory, err))
 	}
 	return d.Clean()
 }
@@ -24,7 +26,7 @@ func CleanRemedyDir() (err error) {
 func ExtractIntoRemedyDir(t *tar.T) (err error) {
 	err = CleanRemedyDir()
 	if err != nil {
-		return
+		return logError(status.Errorf(codes.Internal, "Cannot clean default patch folder: %v | %v", utility.RemedyDirectory, err))
 	}
 	return t.Untar(utility.RemedyDirectory)
 }
@@ -33,6 +35,7 @@ func ExtractIntoRemedyDir(t *tar.T) (err error) {
 func PostActionAfterUploadFile(
 	fileName, fileType string, fileData bytes.Buffer,
 ) (fileList []*pb.FILE, fileSizeWritten int64, err error) {
+	start := time.Now()
 
 	// Assets directory - Default patch hold directory
 	assetDir, err := dir.New(utility.AssetsDirectory)
@@ -63,7 +66,8 @@ func PostActionAfterUploadFile(
 	}
 
 	for _, f := range files {
-		fileList = append(fileList, convertToFILE(f))
+		fileList = append(fileList, ConvertFToFILE(f))
 	}
+	log.Println("FILE UPLOAD POST ACTION FOR", fileName+fileType, "T:", time.Since(start))
 	return
 }

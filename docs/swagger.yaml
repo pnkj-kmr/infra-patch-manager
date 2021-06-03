@@ -1,0 +1,109 @@
+definitions:
+  jsn.Remote:
+    properties:
+      address:
+        type: string
+      apps:
+        items:
+          $ref: '#/definitions/jsn.RemoteApp'
+        type: array
+      name:
+        type: string
+      status:
+        type: boolean
+    type: object
+  jsn.RemoteApp:
+    properties:
+      apptype:
+        type: string
+      name:
+        type: string
+      path:
+        type: string
+      service:
+        type: string
+      status:
+        type: boolean
+    type: object
+info:
+  contact:
+    name: PANKAJ KUMAR
+  description: Patch APIs helps to describe the available routes for patch master
+    server.
+  license:
+    name: MIT Licence
+    url: https://www.github.com/pnkj-kmr/patch/README.md
+  title: Patch API
+  version: "1.0"
+paths:
+  /api/check:
+    get:
+      consumes:
+      - application/json
+      description: Endpoint check with formal api call
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: status check api call
+      tags:
+      - Status
+  /api/remote/{name}:
+    get:
+      consumes:
+      - application/json
+      description: searching remote by name
+      parameters:
+      - description: Remote Name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/jsn.Remote'
+      summary: searching remote by name
+      tags:
+      - Patch
+  /api/remotes:
+    get:
+      consumes:
+      - application/json
+      description: getting all remotes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            items:
+              $ref: '#/definitions/jsn.Remote'
+            type: array
+      summary: getting all available remotes
+      tags:
+      - Patch
+  /api/remotes/rights:
+    get:
+      consumes:
+      - application/json
+      description: getting remote rights of read/write
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            items:
+              $ref: '#/definitions/jsn.Remote'
+            type: array
+      summary: getting remote rights of read/write
+      tags:
+      - Patch
+swagger: "2.0"

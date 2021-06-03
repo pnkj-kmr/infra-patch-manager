@@ -1,6 +1,8 @@
 package file
 
 import (
+	"log"
+
 	"github.com/pnkj-kmr/patch/module"
 )
 
@@ -11,6 +13,7 @@ func (f *F) IsSameFileAt(d module.I, old bool) (match bool, err error) {
 	} else {
 		match = isSameAndNew(f, d)
 	}
+	log.Println("FILE_COMPARE: matched-", match, "old flag-", false, "from-", f.Path(), "to-", d.Path())
 	return
 }
 

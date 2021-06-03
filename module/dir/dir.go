@@ -7,8 +7,8 @@ import (
 
 // D defines the Directory Information
 type D struct {
-	P string
-	I fs.FileInfo
+	P string      `json:"path"`
+	I fs.FileInfo `json:"info"`
 }
 
 // New creates the directory struct

@@ -32,7 +32,6 @@ func RemoteRWRights(target string) (match bool, err error) {
 			}
 		}
 	}
-	log.Println("Returns    :", match)
-	log.Println("RemoteRWRights: TIME   ", time.Since(start))
+	log.Println("R/W CHECKS FOR", target, "OK:", match, "T:", time.Since(start))
 	return
 }

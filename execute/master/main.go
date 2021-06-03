@@ -1,58 +1,53 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
-	"path/filepath"
 
-	"github.com/pnkj-kmr/patch/task"
+	"github.com/gofiber/fiber/v2"
+	"github.com/pnkj-kmr/patch/server"
+	"github.com/pnkj-kmr/patch/utility"
+
+	_ "github.com/pnkj-kmr/patch/docs"
 )
 
+// @title Patch API
+// @version 1.0
+// @description Patch APIs helps to describe the available routes for patch master server.
+// @contact.name PANKAJ KUMAR
+// @license.name MIT Licence
+// @license.url https://www.github.com/pnkj-kmr/patch/README.md
 func main() {
-	// address := flag.String("address", "", "the server port")
-	// flag.Parse()
-	// log.Printf("dail address : %s", *address)
+	address := flag.String("address", "", "the server port")
+	flag.Parse()
 
-	// conn, err := grpc.Dial(*address, grpc.WithInsecure())
-	// addrs := []string{"0.0.0.0:8080", "0.0.0.0:8081"}
-	// for _, addr := range addrs {
-	// 	rpc(addr)
-	// }
-
-	task, err := task.NewPatchTask()
+	config, err := utility.LoadConfig()
 	if err != nil {
-		log.Fatal("task object errors:", err)
+		log.Fatal("Unable to load configuration file", err)
 	}
 
-	msg := "ping"
-	remoteStat := task.PingToAll(msg)
-	for k, v := range remoteStat {
-		log.Println(">>>>> HOST host:", k, "req:", msg, "res:", v)
-	}
+	fiberConfig := utility.FiberConfig(config)
 
-	path := filepath.Join("tmp3/test.tar.gz")
-	result := task.PatchFileUploadToAll(path)
-	for _, r := range result {
-		log.Println("FILE UPLOAD : ", r.Remote, r.File, r.Size, r.Ok, r.Err)
-		for _, f := range r.Data {
-			// log.Println(f)
-			log.Println("File-- : ", f.GetPath(), f.GetFile(), f.GetSize(), f.GetIsdir(), f.GetTime())
-		}
-	}
+	// Define a new Fiber app with config.
+	app := fiber.New(fiberConfig)
 
+	// Middlewares.
+	server.FiberMiddleware(app) // Register Fiber's default middleware
+
+	// Routes.
+	server.SwaggerRoute(app) // Register a route for API Docs (Swagger).
+	server.PublicRoutes(app) // Register a public routes for app.
+	// server.PrivateRoutes(app) 	// Register a private routes for app.
+	server.NotFoundRoute(app) // Register route for 404 Error.
+
+	// Start server (with graceful shutdown).
+	var serverAddress string
+	if len(*address) > 0 {
+		serverAddress = *address
+	} else {
+		serverAddress = fmt.Sprintf("0.0.0.0:%s", config.Port)
+	}
+	// server.StartServer(app, serverAddress)
+	server.StartServerWithGracefulShutdown(app, serverAddress)
 }
-
-// func rpc(addr string) {
-// 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
-// 	if err != nil {
-// 		log.Println("cannot start the server agent ", err)
-// 	}
-
-// 	pingClient := pb.NewPatchClient(conn)
-
-// 	req := &pb.PingRequest{Msg: "ping"}
-// 	res, err := pingClient.Ping(context.Background(), req)
-// 	if err != nil {
-// 		log.Println("cannot start the server agent ", err)
-// 	}
-// 	log.Println(">>>>>> RES <<<<<<", res.GetMsg())
-// }

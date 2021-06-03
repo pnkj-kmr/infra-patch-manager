@@ -21,7 +21,7 @@ func (d *D) Clean() (err error) {
 	var path string
 	for _, name := range names {
 		path = filepath.Join(d.Path(), name)
-		log.Println("Remove: CONTENT: ", path)
+		log.Println("CLEAN: content -", path)
 		err = os.RemoveAll(path)
 		if err != nil {
 			return err

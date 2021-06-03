@@ -3,16 +3,20 @@ package jsn
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/pnkj-kmr/patch/utility"
 )
 
 // RemoteApp defines the app basic details
 type RemoteApp struct {
-	AppType string `json:"apptype"`
 	Name    string `json:"name"`
 	Path    string `json:"path"`
 	Service string `json:"service"`
+	Type    string `json:"apptype"`
+	Status  bool   `json:"status"`
 }
 
 // Remote defines the server basic details
@@ -20,6 +24,7 @@ type Remote struct {
 	Name    string      `json:"name"`
 	Address string      `json:"address"`
 	Apps    []RemoteApp `json:"apps"`
+	Status  bool        `json:"status"`
 }
 
 // GetRemotes - load func for remotes r
@@ -29,7 +34,8 @@ func GetRemotes() (r []Remote, err error) {
 		return
 	}
 	// Open our jsonFile
-	jsonFile, err := os.Open(filepath.Join(wd, "conf", "remotes.json"))
+	path := filepath.Join(wd, utility.ConfDirectory, "remotes.json")
+	jsonFile, err := os.Open(path)
 	if err != nil {
 		return
 	}
@@ -41,5 +47,6 @@ func GetRemotes() (r []Remote, err error) {
 	}
 
 	json.Unmarshal(byteValue, &r)
+	log.Println("DEFAULT REMOTE CONFIGURATION FILE", path)
 	return
 }

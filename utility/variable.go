@@ -13,6 +13,9 @@ var RevokeDirectory string
 // AssetsDirectory - default tar files location
 var AssetsDirectory string
 
+// ConfDirectory - default configuration loaction
+var ConfDirectory string = "conf"
+
 func init() {
 	config, err := LoadConfig()
 	if err != nil {

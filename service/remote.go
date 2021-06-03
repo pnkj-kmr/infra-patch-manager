@@ -36,7 +36,7 @@ func NewRemoteConfig() (r *RemoteConfig, err error) {
 func (r *RemoteConfig) Get(remote string) *ClientInfo {
 	site, ok := r.RemoteMap[remote]
 	if !ok {
-		log.Println("Remote not exists:", remote, site)
+		log.Println("Remote does not exist:", remote, site)
 		return &ClientInfo{
 			Ok:     false,
 			Remote: jsn.Remote{Name: remote},

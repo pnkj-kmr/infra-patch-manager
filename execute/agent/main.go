@@ -19,6 +19,9 @@ func main() {
 	pingServer := service.NewPatchServer()
 	grpcServer := grpc.NewServer()
 	pb.RegisterPatchServer(grpcServer, pingServer)
+	// // TO DEBUG THE gRPC SERVICE with help to
+	// // EVANS Client --- https://github.com/ktr0731/evans
+	// reflection.Register(grpcServer)
 
 	address := fmt.Sprintf("0.0.0.0:%d", *port)
 	listener, err := net.Listen("tcp", address)

@@ -2,6 +2,7 @@ package dir
 
 import (
 	"io/fs"
+	"log"
 	"path/filepath"
 
 	"github.com/pnkj-kmr/patch/module/file"
@@ -11,8 +12,10 @@ import (
 func (d *D) Scan() (files []*file.F, err error) {
 	err = filepath.Walk(d.Path(), closure(&files, d.Path()))
 	if err != nil {
+		log.Println("Cannot scan the path ", d.Path(), err)
 		return nil, err
 	}
+	log.Println("SCAN: files -", len(files))
 	return files, nil
 }
 

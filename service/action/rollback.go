@@ -15,6 +15,7 @@ import (
 func CleanRevokeDir() (err error) {
 	d, err := dir.New(utility.RevokeDirectory)
 	if err != nil {
+		log.Println("Unable to load rollback folder", err)
 		return err
 	}
 	return d.Clean()
@@ -24,10 +25,12 @@ func CleanRevokeDir() (err error) {
 func BackupRevokeDir() (err error) {
 	d, err := dir.New(utility.RevokeDirectory)
 	if err != nil {
+		log.Println("Unable to load rollback folder", utility.RevokeDirectory, err)
 		return err
 	}
 	assetDir, err := dir.New(utility.AssetsDirectory)
 	if err != nil {
+		log.Println("Unable to load assets folder", utility.AssetsDirectory, err)
 		return err
 	}
 	t := tar.New(utility.RandomStringWithTime(0, "ROLLBACK"), "tar.gz", assetDir.Path())
@@ -44,18 +47,22 @@ func RollbackFrom(target string) (err error) {
 	}
 	revokePath, err := dir.New(utility.RevokeDirectory)
 	if err != nil {
+		log.Println("Unable to load rollback folder", utility.RevokeDirectory, err)
 		return err
 	}
 	fromDir, err := dir.New(target)
 	if err != nil {
+		log.Println("Unable to load given target folder", target, err)
 		return err
 	}
 	remedyDir, err := dir.New(utility.RemedyDirectory)
 	if err != nil {
+		log.Println("Unable to load default patch folder", utility.RemedyDirectory, err)
 		return
 	}
 	files, err := remedyDir.Scan()
 	if err != nil {
+		log.Println("Unable to scan", utility.RemedyDirectory, err)
 		return
 	}
 	for _, f := range files {
@@ -88,7 +95,7 @@ func RollbackFrom(target string) (err error) {
 			}
 		}
 	}
-	log.Println("Rollback: TIME   ", time.Since(start))
+	log.Println("ROLLBACK FROM", target, "T:", time.Since(start))
 	return
 }
 
@@ -97,15 +104,18 @@ func VerifyRollback(target string) (match bool, err error) {
 	start := time.Now()
 	src, err := dir.New(utility.RevokeDirectory)
 	if err != nil {
+		log.Println("Unable to load rollback folder", utility.RevokeDirectory, err)
 		return
 	}
 	files, err := src.Scan()
 	if err != nil {
+		log.Println("Unable to scan", utility.RevokeDirectory, err)
 		return
 	}
 	for _, file := range files {
 		dstInfo, e := dir.New(filepath.Join(target, file.RPath()))
 		if e != nil {
+			match = false
 			break
 		}
 		ok, _ := file.IsSameFileAt(dstInfo, true)
@@ -114,7 +124,6 @@ func VerifyRollback(target string) (match bool, err error) {
 			break
 		}
 	}
-	log.Println("Value:", match)
-	log.Println("Check: TIME   ", time.Since(start))
+	log.Println("ROLLBACK VERIFIED FOR", target, "OK:", match, "T:", time.Since(start))
 	return
 }

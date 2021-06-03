@@ -5,3 +5,4 @@ remedy
 **/*.tar*
 tmp*
 .DS_Store
+build

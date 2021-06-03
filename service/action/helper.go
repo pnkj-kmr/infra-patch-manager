@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/pnkj-kmr/patch/module/dir"
 	"github.com/pnkj-kmr/patch/module/file"
 	"github.com/pnkj-kmr/patch/service/pb"
 	"google.golang.org/grpc/codes"
@@ -29,11 +30,24 @@ func logError(err error) error {
 	return err
 }
 
-func convertToF(f *pb.FILE) *file.F {
-	return nil
+// // ConvertFILEToF converts the desire object
+// func ConvertFILEToF(f *pb.FILE) *file.F {
+// 	return nil
+// }
+
+// ConvertFToFILE converts the desire object
+func ConvertFToFILE(f *file.F) *pb.FILE {
+	return &pb.FILE{
+		Isdir: f.IsDir(),
+		File:  f.Name(),
+		Path:  f.Path(),
+		Size:  f.Size(),
+		Time:  timestamppb.New(f.ModTime()),
+	}
 }
 
-func convertToFILE(f *file.F) *pb.FILE {
+// ConvertDToFILE converts the desire object
+func ConvertDToFILE(f *dir.D) *pb.FILE {
 	return &pb.FILE{
 		Isdir: f.IsDir(),
 		File:  f.Name(),

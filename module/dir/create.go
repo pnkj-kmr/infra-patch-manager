@@ -14,7 +14,7 @@ func (d *D) Create(path string) (err error) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(newPath, d.Mode())
-			log.Println("Create: DIR: ", newPath)
+			log.Println("CREATE: dir -", newPath)
 		}
 	}
 	return
@@ -36,7 +36,9 @@ func CreateDirectoryIfNotExists(path string) (newpath string, err error) {
 			if err != nil {
 				log.Println("Cannot create directory: ", d.Path(), path, err)
 			}
-			return filepath.Join(d.Path(), path), err
+			newpath = filepath.Join(d.Path(), path)
+			log.Println("CREATE: if not exists - dir -", newpath)
+			return newpath, err
 		}
 	}
 	return
