@@ -5,8 +5,8 @@ import (
 	"net"
 	"testing"
 
-	"github.com/pnkj-kmr/patch/service"
-	"github.com/pnkj-kmr/patch/service/pb"
+	"github.com/pnkj-kmr/infra-patch-manager/service"
+	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 )

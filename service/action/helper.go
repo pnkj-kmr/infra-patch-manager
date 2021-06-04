@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/pnkj-kmr/patch/module/dir"
-	"github.com/pnkj-kmr/patch/module/file"
-	"github.com/pnkj-kmr/patch/service/pb"
+	"github.com/pnkj-kmr/infra-patch-manager/module/dir"
+	"github.com/pnkj-kmr/infra-patch-manager/module/file"
+	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"

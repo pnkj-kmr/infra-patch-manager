@@ -7,9 +7,9 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/pnkj-kmr/patch/service/action"
-	"github.com/pnkj-kmr/patch/service/pb"
-	"github.com/pnkj-kmr/patch/utility"
+	"github.com/pnkj-kmr/infra-patch-manager/service/action"
+	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
+	"github.com/pnkj-kmr/infra-patch-manager/utility"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -45,7 +45,7 @@ func (p *PatchServer) RightsCheck(ctx context.Context, req *pb.RightsCheckReques
 
 	checkApps := make([]*pb.AppRightsInfo, len(apps))
 	for i, app := range apps {
-		match, err := action.RemoteRWRights(app.GetPath())
+		match, err := action.RemoteRWRights(app.GetSource())
 		if err != nil {
 			log.Println("Rights check error", err)
 		}

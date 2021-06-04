@@ -6,14 +6,16 @@
             {
                 "apptype": "dc",
                 "name": "remote1-app1",
-                "path": "./tmp/app1-1",
-                "service": "app1"
+                "source": "./tmp/app1-1",
+                "service": "app1",
+                "port": "8002"
             },
             {
                 "apptype": "dc",
                 "name": "remote1-app2",
-                "path": "./tmp/app1-2",
-                "service": "app2"
+                "source": "./tmp/app1-2",
+                "service": "app2",
+                "port": "8002"
             }
         ]
     },
@@ -24,8 +26,9 @@
             {
                 "apptype": "app",
                 "name": "remote-2-app2",
-                "path": "./tmp/app2-1",
-                "service": "app1"
+                "source": "./tmp/app2-1",
+                "service": "app1",
+                "port": "8002"
             }
         ]
     },
@@ -36,8 +39,9 @@
             {
                 "apptype": "app",
                 "name": "remote-3-app3",
-                "path": "./tmp3/app3",
-                "service": "app1"
+                "source": "./tmp3/app3",
+                "service": "app1",
+                "port": "8002"
             }
         ]
     }

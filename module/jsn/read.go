@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pnkj-kmr/patch/utility"
+	"github.com/pnkj-kmr/infra-patch-manager/utility"
 )
 
 // RemoteStatus holds the status time
@@ -19,7 +19,7 @@ type RemoteStatus struct {
 // RemoteApp defines the app basic details
 type RemoteApp struct {
 	Name    string       `json:"name"`
-	Path    string       `json:"path"`
+	Source  string       `json:"source"`
 	Service string       `json:"service"`
 	Type    string       `json:"apptype"`
 	Status  RemoteStatus `json:"status,omitempty"`

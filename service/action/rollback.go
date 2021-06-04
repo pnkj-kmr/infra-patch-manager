@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/pnkj-kmr/patch/module/dir"
-	"github.com/pnkj-kmr/patch/module/file"
-	"github.com/pnkj-kmr/patch/module/tar"
-	"github.com/pnkj-kmr/patch/utility"
+	"github.com/pnkj-kmr/infra-patch-manager/module/dir"
+	"github.com/pnkj-kmr/infra-patch-manager/module/file"
+	"github.com/pnkj-kmr/infra-patch-manager/module/tar"
+	"github.com/pnkj-kmr/infra-patch-manager/utility"
 )
 
 // CleanRevokeDir cleans the rollback folder
@@ -40,8 +40,7 @@ func BackupRevokeDir() (err error) {
 // RollbackFrom helps to take a rollback patch from target folder
 func RollbackFrom(target string) (err error) {
 	start := time.Now()
-	err = BackupRevokeDir() // backup
-	err = CleanRevokeDir()  // cleaning the dir
+	err = CleanRevokeDir() // cleaning the dir
 	if err != nil {
 		return err
 	}
@@ -95,6 +94,7 @@ func RollbackFrom(target string) (err error) {
 			}
 		}
 	}
+	err = BackupRevokeDir() // backup
 	log.Println("ROLLBACK FROM", target, "T:", time.Since(start))
 	return
 }

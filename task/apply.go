@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pnkj-kmr/patch/service/pb"
+	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
 )
 
 // ApplyResult defines the returns result of remotes
@@ -32,7 +32,7 @@ func (t *PatchTask) ApplyPatchTo(remote string) (out []*ApplyResult) {
 	if c.Ok {
 		var targets []string
 		for _, app := range c.Remote.Apps {
-			targets = append(targets, app.Path)
+			targets = append(targets, app.Source)
 		}
 		log.Println(c.Remote.Name, "APPLY: sending request for applying patch for apps", targets)
 		res, err := c.ApplyPatch(targets)
@@ -61,7 +61,7 @@ func (t *PatchTask) ApplyPatchToAll() (out map[string][]*ApplyResult) {
 		if c.Ok {
 			targets = []string{}
 			for _, app := range c.Remote.Apps {
-				targets = append(targets, app.Path)
+				targets = append(targets, app.Source)
 			}
 			log.Println(remote, "APPLY: sending request for applying patch for apps", targets)
 			res, err := c.ApplyPatch(targets)

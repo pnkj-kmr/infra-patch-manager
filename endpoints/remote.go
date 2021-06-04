@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/pnkj-kmr/patch/task"
+	"github.com/pnkj-kmr/infra-patch-manager/task"
 )
 
 // GetRemoteList method gives avaiable remotes in system

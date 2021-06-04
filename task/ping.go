@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/pnkj-kmr/patch/module/jsn"
+	"github.com/pnkj-kmr/infra-patch-manager/module/jsn"
 )
 
 // PingTo defines the grpc Ping method call

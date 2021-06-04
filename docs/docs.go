@@ -23,7 +23,7 @@ var doc = `{
         },
         "license": {
             "name": "MIT Licence",
-            "url": "https://www.github.com/pnkj-kmr/patch/README.md"
+            "url": "https://www.github.com/pnkj-kmr/infra-patch-manager/README.md"
         },
         "version": "{{.Version}}"
     },

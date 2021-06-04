@@ -1,7 +1,7 @@
 package task
 
 import (
-	"github.com/pnkj-kmr/patch/service"
+	"github.com/pnkj-kmr/infra-patch-manager/service"
 )
 
 // // Task defines all task action/operation functions

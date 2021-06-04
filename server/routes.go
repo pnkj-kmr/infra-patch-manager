@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/pnkj-kmr/patch/endpoints"
+	"github.com/pnkj-kmr/infra-patch-manager/endpoints"
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
 )

@@ -3,7 +3,7 @@ package file
 import (
 	"log"
 
-	"github.com/pnkj-kmr/patch/module"
+	"github.com/pnkj-kmr/infra-patch-manager/module"
 )
 
 // IsSameFileAt helps to verify src and dst file - same or not

@@ -3,8 +3,8 @@ package service
 import (
 	"log"
 
-	"github.com/pnkj-kmr/patch/module/jsn"
-	"github.com/pnkj-kmr/patch/service/pb"
+	"github.com/pnkj-kmr/infra-patch-manager/module/jsn"
+	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
 )
 
 // Remote defines the remote config interface

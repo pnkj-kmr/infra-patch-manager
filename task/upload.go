@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pnkj-kmr/patch/module/dir"
-	"github.com/pnkj-kmr/patch/service/pb"
+	"github.com/pnkj-kmr/infra-patch-manager/module/dir"
+	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
 )
 
 // UploadResult defines the returns result of remotes

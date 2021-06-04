@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pnkj-kmr/patch/module"
+	"github.com/pnkj-kmr/infra-patch-manager/module"
 )
 
 // Copy helps mkdir

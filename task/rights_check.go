@@ -3,7 +3,7 @@ package task
 import (
 	"log"
 
-	"github.com/pnkj-kmr/patch/module/jsn"
+	"github.com/pnkj-kmr/infra-patch-manager/module/jsn"
 )
 
 // RightsCheckFor defines the grpc

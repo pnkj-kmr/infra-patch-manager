@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pnkj-kmr/patch/utility"
+	"github.com/pnkj-kmr/infra-patch-manager/utility"
 )
 
 // Untar helps to extract the given tar/tar.gz file

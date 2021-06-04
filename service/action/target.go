@@ -4,8 +4,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/pnkj-kmr/patch/module/dir"
-	"github.com/pnkj-kmr/patch/utility"
+	"github.com/pnkj-kmr/infra-patch-manager/module/dir"
+	"github.com/pnkj-kmr/infra-patch-manager/utility"
 )
 
 // RemoteRWRights helps to check read/write at given target

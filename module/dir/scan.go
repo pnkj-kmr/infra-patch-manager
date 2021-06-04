@@ -5,7 +5,7 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/pnkj-kmr/patch/module/file"
+	"github.com/pnkj-kmr/infra-patch-manager/module/file"
 )
 
 // Scan helps to scan the directory

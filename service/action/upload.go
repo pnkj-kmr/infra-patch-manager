@@ -5,10 +5,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/pnkj-kmr/patch/module/dir"
-	"github.com/pnkj-kmr/patch/module/tar"
-	"github.com/pnkj-kmr/patch/service/pb"
-	"github.com/pnkj-kmr/patch/utility"
+	"github.com/pnkj-kmr/infra-patch-manager/module/dir"
+	"github.com/pnkj-kmr/infra-patch-manager/module/tar"
+	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
+	"github.com/pnkj-kmr/infra-patch-manager/utility"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/pnkj-kmr/patch/module/jsn"
-	"github.com/pnkj-kmr/patch/service/pb"
-	"github.com/pnkj-kmr/patch/utility"
+	"github.com/pnkj-kmr/infra-patch-manager/module/jsn"
+	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
+	"github.com/pnkj-kmr/infra-patch-manager/utility"
 	"google.golang.org/grpc"
 )
 
@@ -65,7 +65,7 @@ func (c *ClientInfo) RightsCheck(apps []jsn.RemoteApp) (out []jsn.RemoteApp, err
 	for _, app := range apps {
 		rApps = append(rApps, &pb.APP{
 			Name:    app.Name,
-			Path:    app.Path,
+			Source:  app.Source,
 			Service: app.Service,
 		})
 	}
@@ -81,7 +81,7 @@ func (c *ClientInfo) RightsCheck(apps []jsn.RemoteApp) (out []jsn.RemoteApp, err
 		app = appinfo.GetRemoteApp()
 		out = append(out, jsn.RemoteApp{
 			Name:    app.GetName(),
-			Path:    app.GetPath(),
+			Source:  app.GetSource(),
 			Service: app.GetService(),
 			Status:  jsn.RemoteStatus{Ok: appinfo.GetHasRights()},
 		})

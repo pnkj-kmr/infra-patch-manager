@@ -6,10 +6,10 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/pnkj-kmr/patch/server"
-	"github.com/pnkj-kmr/patch/utility"
+	"github.com/pnkj-kmr/infra-patch-manager/server"
+	"github.com/pnkj-kmr/infra-patch-manager/utility"
 
-	_ "github.com/pnkj-kmr/patch/docs"
+	_ "github.com/pnkj-kmr/infra-patch-manager/docs"
 )
 
 // @title Patch API
@@ -17,7 +17,7 @@ import (
 // @description Patch APIs helps to describe the available routes for patch master server.
 // @contact.name PANKAJ KUMAR
 // @license.name MIT Licence
-// @license.url https://www.github.com/pnkj-kmr/patch/README.md
+// @license.url https://www.github.com/pnkj-kmr/infra-patch-manager/README.md
 func main() {
 	address := flag.String("address", "", "the server port")
 	flag.Parse()
