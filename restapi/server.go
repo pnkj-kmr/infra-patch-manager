@@ -1,4 +1,4 @@
-package server
+package restapi
 
 import (
 	"log"

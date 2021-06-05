@@ -4,9 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"time"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
 )
 
@@ -45,14 +43,4 @@ func LoadConfig() (config Config, err error) {
 	log.Println("Config Name:", f)
 	return
 
-}
-
-// FiberConfig func for configuration Fiber app.
-// See: https://docs.gofiber.io/api/fiber#config
-func FiberConfig(c Config) fiber.Config {
-
-	// Return Fiber configuration.
-	return fiber.Config{
-		ReadTimeout: time.Second * time.Duration(c.ReadTimeout),
-	}
 }

@@ -1,4 +1,4 @@
-package action
+package server
 
 import (
 	"log"
@@ -6,43 +6,42 @@ import (
 	"time"
 
 	"github.com/pnkj-kmr/infra-patch-manager/module/dir"
+	"github.com/pnkj-kmr/infra-patch-manager/service"
 	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
 	"github.com/pnkj-kmr/infra-patch-manager/utility"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-// ApplyPatchTo helps to apply patch to target folder
-func ApplyPatchTo(target string, backup bool) (err error) {
+func applyPatchTo(target string, backup bool) (err error) {
 	start := time.Now()
 	// R/W check for target folder
-	rw, err := RemoteRWRights(target)
+	rw, err := remoteRWRights(target)
 	if !rw || err != nil {
-		return logError(status.Errorf(codes.Internal, "target remote is not having read/write permission: %v | %v", target, err))
+		return service.LogError(status.Errorf(codes.Internal, "target remote is not having read/write permission: %v | %v", target, err))
 	}
 	if backup {
 		// taking a rollbackup backup
-		err = RollbackFrom(target)
+		err = rollbackFrom(target)
 		if err != nil {
-			return logError(status.Errorf(codes.Internal, "rollback backup failed: %v | %v", target, err))
+			return service.LogError(status.Errorf(codes.Internal, "rollback backup failed: %v | %v", target, err))
 		}
 		// verifying the rollback patch
-		_, err := VerifyRollback(target)
+		_, err := verifyRollback(target)
 		if err != nil {
-			return logError(status.Errorf(codes.Internal, "rollback files are improper: %v | %v", target, err))
+			return service.LogError(status.Errorf(codes.Internal, "rollback files are improper: %v | %v", target, err))
 		}
 	}
 	// applying patch to given folder
-	err = PatchTo(target)
+	err = patchTo(target)
 	if err != nil {
-		return logError(status.Errorf(codes.Internal, "Apply patch failed: %v | %v", target, err))
+		return service.LogError(status.Errorf(codes.Internal, "Apply patch failed: %v | %v", target, err))
 	}
 	log.Println("PATCH APPLY TO", target, "T:", time.Since(start))
 	return
 }
 
-// VerifyPatch helps to verify the applied patch
-func VerifyPatch(target string) (f []*pb.FILE, match bool, err error) {
+func verifyPatch(target string) (f []*pb.FILE, match bool, err error) {
 	start := time.Now()
 	src, err := dir.New(utility.RemedyDirectory)
 	if err != nil {
@@ -66,14 +65,13 @@ func VerifyPatch(target string) (f []*pb.FILE, match bool, err error) {
 		if !ok {
 			break
 		}
-		f[i] = ConvertDToFILE(dstInfo)
+		f[i] = service.ConvertToFILE(dstInfo)
 	}
 	log.Println("PATCH VERIFED FOR", target, "OK:", match, "T:", time.Since(start))
 	return
 }
 
-// PatchTo helps to apply patch to target folder
-func PatchTo(target string) (err error) {
+func patchTo(target string) (err error) {
 	start := time.Now()
 	src, err := dir.New(utility.RemedyDirectory)
 	if err != nil {

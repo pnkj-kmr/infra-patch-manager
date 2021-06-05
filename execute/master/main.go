@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/pnkj-kmr/infra-patch-manager/server"
+	"github.com/pnkj-kmr/infra-patch-manager/restapi"
 	"github.com/pnkj-kmr/infra-patch-manager/utility"
 
 	_ "github.com/pnkj-kmr/infra-patch-manager/docs"
@@ -27,19 +27,19 @@ func main() {
 		log.Fatal("Unable to load configuration file", err)
 	}
 
-	fiberConfig := utility.FiberConfig(config)
+	fiberConfig := restapi.FiberConfig(config)
 
 	// Define a new Fiber app with config.
 	app := fiber.New(fiberConfig)
 
 	// Middlewares.
-	server.FiberMiddleware(app) // Register Fiber's default middleware
+	restapi.FiberMiddleware(app) // Register Fiber's default middleware
 
 	// Routes.
-	server.SwaggerRoute(app) // Register a route for API Docs (Swagger).
-	server.PublicRoutes(app) // Register a public routes for app.
+	restapi.SwaggerRoute(app) // Register a route for API Docs (Swagger).
+	restapi.PublicRoutes(app) // Register a public routes for app.
 	// server.PrivateRoutes(app) 	// Register a private routes for app.
-	server.NotFoundRoute(app) // Register route for 404 Error.
+	restapi.NotFoundRoute(app) // Register route for 404 Error.
 
 	// Start server (with graceful shutdown).
 	var serverAddress string
@@ -49,5 +49,5 @@ func main() {
 		serverAddress = fmt.Sprintf("0.0.0.0:%s", config.Port)
 	}
 	// server.StartServer(app, serverAddress)
-	server.StartServerWithGracefulShutdown(app, serverAddress)
+	restapi.StartServerWithGracefulShutdown(app, serverAddress)
 }

@@ -1,12 +1,12 @@
-package service_test
+package client_test
 
 import (
 	"context"
 	"net"
 	"testing"
 
-	"github.com/pnkj-kmr/infra-patch-manager/service"
 	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
+	"github.com/pnkj-kmr/infra-patch-manager/service/server"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 )
@@ -25,8 +25,8 @@ func TestPingClient(t *testing.T) {
 	require.Equal(t, res.GetMsg(), "PONG")
 }
 
-func startTestPingServer(t *testing.T) (*service.PatchServer, string) {
-	pingServer := service.NewPatchServer()
+func startTestPingServer(t *testing.T) (*server.PatchServer, string) {
+	pingServer := server.NewPatchServer()
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterPatchServer(grpcServer, pingServer)

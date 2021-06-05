@@ -1,4 +1,4 @@
-package service
+package server
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/pnkj-kmr/infra-patch-manager/service/action"
+	"github.com/pnkj-kmr/infra-patch-manager/service"
 	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
 	"github.com/pnkj-kmr/infra-patch-manager/utility"
 	"google.golang.org/grpc/codes"
@@ -45,7 +45,7 @@ func (p *PatchServer) RightsCheck(ctx context.Context, req *pb.RightsCheckReques
 
 	checkApps := make([]*pb.AppRightsInfo, len(apps))
 	for i, app := range apps {
-		match, err := action.RemoteRWRights(app.GetSource())
+		match, err := remoteRWRights(app.GetSource())
 		if err != nil {
 			log.Println("Rights check error", err)
 		}
@@ -62,7 +62,7 @@ func (p *PatchServer) RightsCheck(ctx context.Context, req *pb.RightsCheckReques
 func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 	req, err := stream.Recv()
 	if err != nil {
-		return logError(status.Errorf(codes.Unknown, "cannot receive file info"))
+		return service.LogError(status.Errorf(codes.Unknown, "cannot receive file info"))
 	}
 	fileName := req.GetInfo().GetFileName()
 	fileType := req.GetInfo().GetFileType()
@@ -72,7 +72,7 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 	fileSize := 0
 	for {
 		// checking upload is cancel by send
-		err := contextError(stream.Context())
+		err := service.ContextError(stream.Context())
 		if err != nil {
 			return err
 		}
@@ -83,13 +83,13 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 			break
 		}
 		if err != nil {
-			return logError(status.Errorf(codes.Unknown, "Cannot receieve chunk data: %v", err))
+			return service.LogError(status.Errorf(codes.Unknown, "Cannot receieve chunk data: %v", err))
 		}
 
 		chunk := req.GetChunkData()
 		fileSize += len(chunk)
 		if fileSize > maxFileSize {
-			return logError(status.Errorf(codes.InvalidArgument, "File is too large: %d > %d", fileSize, maxFileSize))
+			return service.LogError(status.Errorf(codes.InvalidArgument, "File is too large: %d > %d", fileSize, maxFileSize))
 		}
 
 		// slow writing data into buffer
@@ -97,12 +97,12 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 
 		_, err = fileData.Write(chunk)
 		if err != nil {
-			return logError(status.Errorf(codes.Internal, "Cannot write chunk data: %v", err))
+			return service.LogError(status.Errorf(codes.Internal, "Cannot write chunk data: %v", err))
 		}
 	}
 
 	// post actions - file save, untar, dir scan
-	fileList, fileSizeWritten, err := action.PostActionAfterUploadFile(fileName, fileType, fileData)
+	fileList, fileSizeWritten, err := postActionAfterUploadFile(fileName, fileType, fileData)
 	if err != nil {
 		return
 	}
@@ -115,7 +115,7 @@ func (p *PatchServer) UploadFile(stream pb.Patch_UploadFileServer) (err error) {
 
 	err = stream.SendAndClose(res)
 	if err != nil {
-		return logError(status.Errorf(codes.Unknown, "cannot sent file upload response: %v", err))
+		return service.LogError(status.Errorf(codes.Unknown, "cannot sent file upload response: %v", err))
 	}
 	log.Println("File uploaded |", fileName, fileSize, fileSizeWritten, (int64(fileSize) == fileSizeWritten))
 	return
@@ -132,7 +132,7 @@ func (p *PatchServer) ApplyPatch(req *pb.ApplyPatchRequest, stream pb.Patch_Appl
 		}
 		err := stream.Send(res)
 		if err != nil {
-			return logError(status.Errorf(codes.Unknown, "cannot sent data: %v", err))
+			return service.LogError(status.Errorf(codes.Unknown, "cannot sent data: %v", err))
 		}
 		log.Println("PATCH applied for remote app:", res.GetRemoteApp(), ", Verified patch:", strconv.FormatBool(res.GetVerified()))
 		return nil
@@ -140,15 +140,15 @@ func (p *PatchServer) ApplyPatch(req *pb.ApplyPatchRequest, stream pb.Patch_Appl
 
 	for i, path := range apps {
 		// checking upload is cancel by send
-		err := contextError(stream.Context())
+		err := service.ContextError(stream.Context())
 		if err != nil {
 			return err
 		}
-		err = action.ApplyPatchTo(path, i == 0)
+		err = applyPatchTo(path, i == 0)
 		if err != nil {
 			return err
 		}
-		files, verified, err := action.VerifyPatch(path)
+		files, verified, err := verifyPatch(path)
 		if err != nil {
 			return err
 		}

@@ -1,4 +1,4 @@
-package action
+package server
 
 import (
 	"log"
@@ -11,8 +11,7 @@ import (
 	"github.com/pnkj-kmr/infra-patch-manager/utility"
 )
 
-// CleanRevokeDir cleans the rollback folder
-func CleanRevokeDir() (err error) {
+func cleanRevokeDir() (err error) {
 	d, err := dir.New(utility.RevokeDirectory)
 	if err != nil {
 		log.Println("Unable to load rollback folder", err)
@@ -21,8 +20,7 @@ func CleanRevokeDir() (err error) {
 	return d.Clean()
 }
 
-// BackupRevokeDir takes a tar backup from rollback folder
-func BackupRevokeDir() (err error) {
+func backupRevokeDir() (err error) {
 	d, err := dir.New(utility.RevokeDirectory)
 	if err != nil {
 		log.Println("Unable to load rollback folder", utility.RevokeDirectory, err)
@@ -37,10 +35,9 @@ func BackupRevokeDir() (err error) {
 	return t.Tar([]string{d.Path()})
 }
 
-// RollbackFrom helps to take a rollback patch from target folder
-func RollbackFrom(target string) (err error) {
+func rollbackFrom(target string) (err error) {
 	start := time.Now()
-	err = CleanRevokeDir() // cleaning the dir
+	err = cleanRevokeDir() // cleaning the dir
 	if err != nil {
 		return err
 	}
@@ -94,13 +91,12 @@ func RollbackFrom(target string) (err error) {
 			}
 		}
 	}
-	err = BackupRevokeDir() // backup
+	err = backupRevokeDir() // backup
 	log.Println("ROLLBACK FROM", target, "T:", time.Since(start))
 	return
 }
 
-// VerifyRollback helps to verify the applied rollback
-func VerifyRollback(target string) (match bool, err error) {
+func verifyRollback(target string) (match bool, err error) {
 	start := time.Now()
 	src, err := dir.New(utility.RevokeDirectory)
 	if err != nil {

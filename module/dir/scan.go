@@ -27,12 +27,11 @@ func closure(files *[]*file.F, basepath string) filepath.WalkFunc {
 		if info.IsDir() {
 			return nil
 		}
-		rpath, err := filepath.Rel(basepath, path)
+		f, err := file.New(path, basepath)
 		if err != nil {
 			return err
 		}
-		spath, _ := filepath.Split(rpath)
-		*files = append(*files, &file.F{P: path, R: rpath, S: spath, I: info})
+		*files = append(*files, f)
 		return nil
 	}
 }

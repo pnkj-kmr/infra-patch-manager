@@ -10,15 +10,15 @@ import (
 	"github.com/pnkj-kmr/infra-patch-manager/module"
 )
 
-// Copy helps mkdir
-func (f *F) Copy(dst module.I) (err error) {
+// Copy helps cp -rf
+func (f *F) Copy(d module.I) (err error) {
 	if !f.Mode().IsRegular() {
 		return fmt.Errorf("Copy: non-regular source file %s (%q)", f.Name(), f.Mode().String())
 	}
-	if !(dst.IsDir()) {
-		return fmt.Errorf("Copy: non-regular destination folder %s (%q)", dst.Name(), dst.Mode().String())
+	if !d.IsDir() {
+		return fmt.Errorf("Copy: non-regular destination folder %s (%q)", d.Name(), d.Mode().String())
 	}
-	err = copy(f.Path(), filepath.Join(dst.Path(), f.Name()))
+	err = copy(f.Path(), filepath.Join(d.Path(), f.Name()))
 	return
 }
 

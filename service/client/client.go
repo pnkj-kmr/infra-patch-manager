@@ -1,4 +1,4 @@
-package service
+package client
 
 import (
 	"bufio"
@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/pnkj-kmr/infra-patch-manager/module/jsn"
+	"github.com/pnkj-kmr/infra-patch-manager/service"
 	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
 	"github.com/pnkj-kmr/infra-patch-manager/utility"
 	"google.golang.org/grpc"
@@ -19,25 +19,25 @@ const (
 	defaultFileExt    = ".tar.gz"       // default file extension
 )
 
-// ClientInfo defines the grpc client with availability status
-type ClientInfo struct {
+// Client defines the grpc client with availability status
+type Client struct {
 	Ok     bool
-	Remote jsn.Remote
+	Remote service.Remote
 	pc     pb.PatchClient
 }
 
-// NewClientInfo return client object
-func NewClientInfo(remote jsn.Remote) *ClientInfo {
+// NewClient return client object
+func NewClient(remote service.Remote) *Client {
 	conn, err := grpc.Dial(remote.Address, grpc.WithInsecure())
 	if err != nil {
 		log.Println("Connection dial check for remote:", remote.Address, err)
-		return &ClientInfo{
+		return &Client{
 			Ok:     false,
 			Remote: remote,
 			pc:     pb.NewPatchClient(nil),
 		}
 	}
-	return &ClientInfo{
+	return &Client{
 		Ok:     true,
 		Remote: remote,
 		pc:     pb.NewPatchClient(conn),
@@ -45,7 +45,7 @@ func NewClientInfo(remote jsn.Remote) *ClientInfo {
 }
 
 // Ping calls the gRPC client
-func (c *ClientInfo) Ping(in string) (out string) {
+func (c *Client) Ping(in string) (out string) {
 	if c.Ok {
 		req := &pb.PingRequest{Msg: in}
 		res, err := c.pc.Ping(context.Background(), req)
@@ -59,7 +59,7 @@ func (c *ClientInfo) Ping(in string) (out string) {
 }
 
 // RightsCheck calls the gRPC client for read/write check
-func (c *ClientInfo) RightsCheck(apps []jsn.RemoteApp) (out []jsn.RemoteApp, err error) {
+func (c *Client) RightsCheck(apps []service.RemoteApp) (out []service.RemoteApp, err error) {
 	log.Println(c.Remote.Name, "Rights check receieved for apps", apps)
 	var rApps []*pb.APP
 	for _, app := range apps {
@@ -79,18 +79,18 @@ func (c *ClientInfo) RightsCheck(apps []jsn.RemoteApp) (out []jsn.RemoteApp, err
 	var app *pb.APP
 	for _, appinfo := range resApps {
 		app = appinfo.GetRemoteApp()
-		out = append(out, jsn.RemoteApp{
+		out = append(out, service.RemoteApp{
 			Name:    app.GetName(),
 			Source:  app.GetSource(),
 			Service: app.GetService(),
-			Status:  jsn.RemoteStatus{Ok: appinfo.GetHasRights()},
+			Status:  service.RemoteStatus{Ok: appinfo.GetHasRights()},
 		})
 	}
 	return
 }
 
 // UploadFile calls upload file gRPC client
-func (c *ClientInfo) UploadFile(path string) (res *pb.UploadFileResponse, err error) {
+func (c *Client) UploadFile(path string) (res *pb.UploadFileResponse, err error) {
 	log.Println(c.Remote.Name, "Patch file upload request received", path)
 	fileName := utility.RandomStringWithTime(0, "PATCH")
 	file, err := os.Open(path)
@@ -159,7 +159,7 @@ func (c *ClientInfo) UploadFile(path string) (res *pb.UploadFileResponse, err er
 }
 
 // ApplyPatch sending a patch request to remote server
-func (c *ClientInfo) ApplyPatch(apps []string) (out []*pb.ApplyPatchResponse, err error) {
+func (c *Client) ApplyPatch(apps []string) (out []*pb.ApplyPatchResponse, err error) {
 	log.Println(c.Remote.Name, "Apply patch receieved for apps", apps)
 	ctx, cancel := context.WithTimeout(context.Background(), maxSessionTimeout)
 	defer cancel()

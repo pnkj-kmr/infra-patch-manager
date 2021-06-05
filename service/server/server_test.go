@@ -1,11 +1,11 @@
-package service_test
+package server_test
 
 import (
 	"context"
 	"testing"
 
-	"github.com/pnkj-kmr/infra-patch-manager/service"
 	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
+	"github.com/pnkj-kmr/infra-patch-manager/service/server"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,7 +36,7 @@ func TestPingServer(t *testing.T) {
 			t.Parallel()
 
 			req := &pb.PingRequest{Msg: tc.msg}
-			server := service.NewPatchServer()
+			server := server.NewPatchServer()
 			res, err := server.Ping(context.Background(), req)
 
 			require.NoError(t, err)

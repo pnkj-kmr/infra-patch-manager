@@ -1,4 +1,4 @@
-package server
+package restapi
 
 import (
 	"github.com/gofiber/fiber/v2"

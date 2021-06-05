@@ -1,4 +1,4 @@
-package action
+package server
 
 import (
 	"log"
@@ -8,8 +8,7 @@ import (
 	"github.com/pnkj-kmr/infra-patch-manager/utility"
 )
 
-// RemoteRWRights helps to check read/write at given target
-func RemoteRWRights(target string) (match bool, err error) {
+func remoteRWRights(target string) (match bool, err error) {
 	start := time.Now()
 	randomStr := utility.RandomString(10)
 	dst, err := dir.New(target)

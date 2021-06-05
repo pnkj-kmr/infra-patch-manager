@@ -9,7 +9,7 @@ clean_grpc:
 	rm -rf service/pb/*.go
 
 gen: clean_grpc
-	protoc --proto_path=proto --go_out=. --go-grpc_out=. proto/*.proto
+	protoc --proto_path=service/proto --go_out=. --go-grpc_out=. service/proto/*.proto
 
 tidy:
 	go mod tidy

@@ -6,8 +6,8 @@ import (
 	"log"
 	"net"
 
-	"github.com/pnkj-kmr/infra-patch-manager/service"
 	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
+	"github.com/pnkj-kmr/infra-patch-manager/service/server"
 	"google.golang.org/grpc"
 )
 
@@ -16,7 +16,7 @@ func main() {
 	flag.Parse()
 	log.Printf("server start on port : %d", *port)
 
-	pingServer := service.NewPatchServer()
+	pingServer := server.NewPatchServer()
 	grpcServer := grpc.NewServer()
 	pb.RegisterPatchServer(grpcServer, pingServer)
 	// // TO DEBUG THE gRPC SERVICE with help to

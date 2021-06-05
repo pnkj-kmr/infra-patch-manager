@@ -1,4 +1,4 @@
-package task_test
+package actions_test
 
 // task, err := task.NewPatchTask()
 // if err != nil {

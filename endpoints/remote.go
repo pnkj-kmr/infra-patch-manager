@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/pnkj-kmr/infra-patch-manager/task"
+	"github.com/pnkj-kmr/infra-patch-manager/actions"
 )
 
 // GetRemoteList method gives avaiable remotes in system
@@ -18,7 +18,7 @@ import (
 // @Router /api/remotes [get]
 func GetRemoteList(c *fiber.Ctx) error {
 
-	task, err := task.NewPatchTask()
+	task, err := actions.NewAction()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(NewErrResponse(err))
 	}
@@ -45,7 +45,7 @@ func GetRemote(c *fiber.Ctx) error {
 	// getting remote name from params
 	remote := c.Params("name")
 
-	task, err := task.NewPatchTask()
+	task, err := actions.NewAction()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(NewErrResponse(err))
 	}
@@ -68,7 +68,7 @@ func GetRemote(c *fiber.Ctx) error {
 // ----Success 200 {array} jsn.Remote status "ok"
 // @Router /api/remotes/rights 	[get]
 func CheckRemotesRights(c *fiber.Ctx) error {
-	task, err := task.NewPatchTask()
+	task, err := actions.NewAction()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(NewErrResponse(err))
 	}
@@ -104,7 +104,7 @@ func CheckRemoteRights(c *fiber.Ctx) error {
 	// log.Println("Remote name >>>", remote)
 	// log.Println("Query string >>>", rQuery)
 
-	task, err := task.NewPatchTask()
+	task, err := actions.NewAction()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(NewErrResponse(err))
 	}

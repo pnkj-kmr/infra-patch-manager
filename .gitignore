@@ -5,4 +5,5 @@ remedy
 **/*.tar*
 tmp*
 .DS_Store
+.vscode
 build
