@@ -77,7 +77,7 @@ func CheckRemotesRights(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"ok":   true,
 		"msg":  "Remotes Rights",
-		"data": task.RightsCheckForAll(),
+		"data": task.RightsCheckForAll(""),
 	})
 }
 

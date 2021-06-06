@@ -18,13 +18,13 @@ type ApplyResult struct {
 }
 
 // ApplyPatchTo defines the grpc Ping method call
-func (a *Action) ApplyPatchTo(remote string) (out []*ApplyResult) {
+func (a *Action) ApplyPatchTo(remote string, apps []string) (out []*ApplyResult) {
 	c := a.r.Get(remote)
 	return getApplyResult(c)
 }
 
 // ApplyPatchToAll defines the grpc Ping method call to all remotes
-func (a *Action) ApplyPatchToAll() (out map[string][]*ApplyResult) {
+func (a *Action) ApplyPatchToAll(apptype string) (out map[string][]*ApplyResult) {
 	out = make(map[string][]*ApplyResult)
 	for _, c := range a.r.GetAll() {
 		out[c.Remote.Name] = getApplyResult(c)
@@ -41,7 +41,7 @@ func getApplyResult(c *client.Client) (out []*ApplyResult) {
 		log.Println(c.Remote.Name, "APPLY: sending request for applying patch for apps", targets)
 		res, err := c.ApplyPatch(targets)
 		if err != nil {
-			out = []*ApplyResult{&ApplyResult{
+			out = []*ApplyResult{{
 				Remote:    c.Remote.Name,
 				RemoteApp: "",
 				Verified:  false,
@@ -62,7 +62,7 @@ func getApplyResult(c *client.Client) (out []*ApplyResult) {
 			}
 		}
 	} else {
-		out = []*ApplyResult{&ApplyResult{
+		out = []*ApplyResult{{
 			Remote:    c.Remote.Name,
 			RemoteApp: "",
 			Verified:  false,

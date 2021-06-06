@@ -41,10 +41,28 @@ func (a *Action) RightsCheckFor(remote string, apps []string) service.Remote {
 }
 
 // RightsCheckForAll defines the grpc
-func (a *Action) RightsCheckForAll() (out []service.Remote) {
+func (a *Action) RightsCheckForAll(apptype string) (out []service.Remote) {
 	for _, c := range a.r.GetAll() {
-		log.Println(c.Remote.Name, "RIGHTS: sending request with data -", c.Remote.Apps)
-		res, err := c.RightsCheck(c.Remote.Apps)
+		log.Println(c.Remote.Name, "RIGHTS: sending request with data -", apptype, c.Remote.Apps)
+		var targetApps []service.RemoteApp
+		var err error
+		if apptype != "" {
+			targetApps, err = getAppsByItsType(c.Remote, apptype)
+		} else {
+			targetApps = c.Remote.Apps
+		}
+		if err != nil {
+			log.Println(c.Remote.Name, "RIGHTS: error -", err)
+			out = append(out, service.Remote{
+				Name:    c.Remote.Name,
+				Address: c.Remote.Address,
+				Apps:    c.Remote.Apps,
+				Status:  service.RemoteStatus{Ok: false, Err: err},
+			})
+			continue
+		}
+		// calling into rights check with target apps
+		res, err := c.RightsCheck(targetApps)
 		if err != nil {
 			log.Println(c.Remote.Name, "RIGHTS: error -", err)
 			out = append(out, service.Remote{
