@@ -25,16 +25,16 @@ func (a *Action) PingToAll(msg string) (out []*service.Remote) {
 
 func getPingResult(c *client.Client, msg string) (out *service.Remote) {
 	log.Println(c.Remote.Name, "PING: sending request with data -", msg)
-	res := c.Ping(msg)
+	res, err := c.Ping(msg)
 	var ok bool
-	if strings.EqualFold(res, "PONG") {
+	if strings.EqualFold(res, "PONG") && err == nil {
 		ok = true
 	}
 	out = &service.Remote{
 		Name:    c.Remote.Name,
 		Address: c.Remote.Address,
 		Apps:    c.Remote.Apps,
-		Status:  service.RemoteStatus{Ok: ok},
+		Status:  service.Status{Ok: ok, Err: err.Error()},
 	}
 	log.Println(c.Remote.Name, "PING: receieved response with data -", res)
 	return

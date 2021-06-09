@@ -9,6 +9,16 @@ info:
   title: Patch API
   version: "1.0"
 paths:
+  /api/apply/patch:
+    post:
+      consumes:
+      - application/json
+      description: apply patch to remote server app(s)
+      produces:
+      - application/json
+      summary: apply patch to remote server app(s)
+      tags:
+      - Patch
   /api/check:
     get:
       consumes:
@@ -100,6 +110,32 @@ paths:
           schema:
             type: string
       summary: getting remotes rights of read/write
+      tags:
+      - Patch
+  /api/upload/patch/{name}:
+    post:
+      consumes:
+      - application/json
+      description: uploading the patch to server
+      parameters:
+      - description: Remote Name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      summary: uploading file to server
+      tags:
+      - Patch
+  /api/verify/patch:
+    post:
+      consumes:
+      - application/json
+      description: verifying the applied server app patch
+      produces:
+      - application/json
+      summary: verifying the applied server app patch
       tags:
       - Patch
 swagger: "2.0"

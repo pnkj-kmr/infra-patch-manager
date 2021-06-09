@@ -5,17 +5,18 @@ import (
 	"log"
 
 	"github.com/pnkj-kmr/infra-patch-manager/module/dir"
+	"github.com/pnkj-kmr/infra-patch-manager/service"
 	"github.com/pnkj-kmr/infra-patch-manager/service/client"
 	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
 )
 
 // UploadResult defines the returns result of remotes
 type UploadResult struct {
-	Remote string
-	File   string
-	Size   uint64
-	Data   []*pb.FILE
-	Err    error
+	Remote string         `json:"remote"`
+	File   string         `json:"filename"`
+	Size   uint64         `json:"size"`
+	Data   []*pb.FILE     `json:"data"`
+	Status service.Status `json:"status"`
 }
 
 // PatchFileUploadTo uploads the file to given remote
@@ -40,12 +41,13 @@ func (a *Action) PatchFileUploadToAll(path string) (out map[string]*UploadResult
 func getUploadResult(c *client.Client, path string) (out *UploadResult) {
 	if !c.Ok {
 		log.Println("Connection is not stable with remote", c.Remote.Name)
+		err := fmt.Errorf("connection to remote failed: %s", c.Remote.Name)
 		out = &UploadResult{
 			Remote: c.Remote.Name,
 			File:   "",
 			Size:   0,
 			Data:   nil,
-			Err:    fmt.Errorf("connection to remote failed: %s", c.Remote.Name),
+			Status: service.Status{Ok: false, Err: err.Error()},
 		}
 		return
 	}
@@ -56,31 +58,39 @@ func getUploadResult(c *client.Client, path string) (out *UploadResult) {
 			File:   "",
 			Size:   0,
 			Data:   nil,
-			Err:    err,
+			Status: service.Status{Ok: false, Err: err.Error()},
 		}
 		return
 	}
 	// Calling the uplaod file client function to upload the file
 	res, err := c.UploadFile(file.Path())
-	out = &UploadResult{
-		Remote: c.Remote.Name,
-		File:   res.GetName(),
-		Size:   res.GetSize(),
-		Data:   res.GetData(),
-		Err:    err,
-	}
 	if err != nil {
-		return
-	}
-	if res.GetSize() != uint64(file.Size()) {
 		out = &UploadResult{
 			Remote: c.Remote.Name,
 			File:   res.GetName(),
 			Size:   res.GetSize(),
 			Data:   res.GetData(),
-			Err:    fmt.Errorf("Uploaded file size does not match: uploaded :%d | given: %d", file.Size(), res.GetSize()),
+			Status: service.Status{Ok: err == nil, Err: err.Error()},
 		}
 		return
+	}
+	if res.GetSize() != uint64(file.Size()) {
+		err = fmt.Errorf("Uploaded file size does not match: uploaded :%d | given: %d", file.Size(), res.GetSize())
+		out = &UploadResult{
+			Remote: c.Remote.Name,
+			File:   res.GetName(),
+			Size:   res.GetSize(),
+			Data:   res.GetData(),
+			Status: service.Status{Ok: false, Err: err.Error()},
+		}
+		return
+	}
+	out = &UploadResult{
+		Remote: c.Remote.Name,
+		File:   res.GetName(),
+		Size:   res.GetSize(),
+		Data:   res.GetData(),
+		Status: service.Status{Ok: true},
 	}
 	log.Println(out.Remote, "UPLOAD: received response data -", out.File, out.Size)
 	return

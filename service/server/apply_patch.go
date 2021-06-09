@@ -53,8 +53,7 @@ func verifyPatch(target string) (f []*pb.FILE, match bool, err error) {
 		log.Println("Unable to scan patch folder", err)
 		return
 	}
-	f = make([]*pb.FILE, len(files))
-	for i, file := range files {
+	for _, file := range files {
 		dstInfo, e := dir.New(filepath.Join(target, file.RPath()))
 		if e != nil {
 			log.Println("Cannot find the file path", filepath.Join(target, file.RPath()), e)
@@ -65,7 +64,11 @@ func verifyPatch(target string) (f []*pb.FILE, match bool, err error) {
 		if !ok {
 			break
 		}
-		f[i] = service.ConvertToFILE(dstInfo)
+		f = append(f, service.ConvertToFILE(dstInfo))
+	}
+	if match {
+		// Crosssing verifying the file length applied and patched
+		match = len(files) == len(f)
 	}
 	log.Println("PATCH VERIFED FOR", target, "OK:", match, "T:", time.Since(start))
 	return

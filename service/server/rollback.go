@@ -31,7 +31,7 @@ func backupRevokeDir() (err error) {
 		log.Println("Unable to load assets folder", utility.AssetsDirectory, err)
 		return err
 	}
-	t := tar.New(utility.RandomStringWithTime(0, "ROLLBACK"), "tar.gz", assetDir.Path())
+	t := tar.New(utility.RandomStringWithTime(0, "ROLLBACK"), ".tar.gz", assetDir.Path())
 	return t.Tar([]string{d.Path()})
 }
 

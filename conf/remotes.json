@@ -1,47 +1,85 @@
 [
     {
         "name": "remote1",
-        "address": "0.0.0.0:8080",
-        "apps": [
-            {
-                "apptype": "dc",
-                "name": "remote1-app1",
-                "source": "./tmp/app1-1",
-                "service": "app1",
-                "port": "8002"
-            },
-            {
-                "apptype": "dc",
-                "name": "remote1-app2",
-                "source": "./tmp/app1-2",
-                "service": "app2",
-                "port": "8002"
-            }
-        ]
-    },
-    {
-        "name": "remote2",
         "address": "0.0.0.0:8081",
         "apps": [
             {
-                "apptype": "app",
-                "name": "remote-2-app2",
-                "source": "./tmp/app2-1",
+                "apptype": "dc",
+                "name": "app1",
+                "source": "/tmp/patch/app1",
                 "service": "app1",
+                "port": "8001"
+            },
+            {
+                "apptype": "dc",
+                "name": "app2",
+                "source": "/tmp/patch/app2",
+                "service": "app2",
                 "port": "8002"
+            },
+            {
+                "apptype": "app",
+                "name": "app3",
+                "source": "/tmp/patch/app3",
+                "service": "app3",
+                "port": "8003"
             }
         ]
-    },
-    {
+    }, {
+        "name": "remote2",
+        "address": "0.0.0.0:8082",
+        "apps": [
+            {
+                "apptype": "dc",
+                "name": "app4",
+                "source": "/tmp/patch/app4",
+                "service": "app4",
+                "port": "8004"
+            },
+            {
+                "apptype": "dc",
+                "name": "app5",
+                "source": "/tmp/patch/app5",
+                "service": "app5",
+                "port": "8005"
+            },
+            {
+                "apptype": "app",
+                "name": "app6",
+                "source": "/tmp/patch/app6",
+                "service": "app6",
+                "port": "8006"
+            }
+        ]
+    }, {
         "name": "remote3",
         "address": "0.0.0.0:8083",
         "apps": [
             {
-                "apptype": "app",
-                "name": "remote-3-app3",
-                "source": "./tmp3/app3",
-                "service": "app1",
-                "port": "8002"
+                "apptype": "dc",
+                "name": "app7",
+                "source": "/tmp/patch/app7",
+                "service": "app7",
+                "port": "8007"
+            },
+            {
+                "apptype": "dc",
+                "name": "app8",
+                "source": "/tmp/patch/app8",
+                "service": "app8",
+                "port": "8008"
+            }
+        ]
+    }, {
+        "name": "remote4",
+        "address": "0.0.0.0:8084",
+        "apps": [
+            {
+                "apptype": "dc",
+                "name": "app9",
+                "source": "/tmp/patch/app9",
+                "service": "app9",
+                "port": "8001"
             }
         ]
     }

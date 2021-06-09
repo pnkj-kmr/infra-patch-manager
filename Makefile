@@ -34,3 +34,16 @@ master: swag
 
 test:
 	go test -cover -race ./...
+
+# Adding new agents
+agent1:
+	go run execute/agent/main.go -port 8081
+
+agent2:
+	go run execute/agent/main.go -port 8082
+
+agent3:
+	go run execute/agent/main.go -port 8083
+
+agent4:
+	go run execute/agent/main.go -port 8084

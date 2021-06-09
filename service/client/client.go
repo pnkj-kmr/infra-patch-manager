@@ -45,15 +45,15 @@ func NewClient(remote service.Remote) *Client {
 }
 
 // Ping calls the gRPC client
-func (c *Client) Ping(in string) (out string) {
+func (c *Client) Ping(in string) (out string, err error) {
 	if c.Ok {
 		req := &pb.PingRequest{Msg: in}
 		res, err := c.pc.Ping(context.Background(), req)
 		if err != nil {
 			log.Println(c.Remote.Name, "Ping request failed:", err)
+			return "", err
 		}
 		out = res.GetMsg()
-		return
 	}
 	return
 }
@@ -83,7 +83,7 @@ func (c *Client) RightsCheck(apps []service.RemoteApp) (out []service.RemoteApp,
 			Name:    app.GetName(),
 			Source:  app.GetSource(),
 			Service: app.GetService(),
-			Status:  service.RemoteStatus{Ok: appinfo.GetHasRights()},
+			Status:  service.Status{Ok: appinfo.GetHasRights()},
 		})
 	}
 	return
@@ -168,6 +168,32 @@ func (c *Client) ApplyPatch(apps []string) (out []*pb.ApplyPatchResponse, err er
 	stream, err := c.pc.ApplyPatch(ctx, req)
 	if err != nil {
 		log.Println(c.Remote.Name, "Cannot send apply patch request to server", err)
+		return
+	}
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Println(c.Remote.Name, "Cannot receieve stream data from server", err)
+			return out, err
+		}
+		out = append(out, res)
+	}
+	return
+}
+
+// VerifyPatch getting the applied patch result to verified the applied patch
+func (c *Client) VerifyPatch(apps []string) (out []*pb.VerifyPatchResponse, err error) {
+	log.Println(c.Remote.Name, "Verify patch receieved for apps", apps)
+	ctx, cancel := context.WithTimeout(context.Background(), maxSessionTimeout)
+	defer cancel()
+
+	req := &pb.VerifyPatchRequest{RemoteApps: apps}
+	stream, err := c.pc.VerifyPatch(ctx, req)
+	if err != nil {
+		log.Println(c.Remote.Name, "Cannot send verify patch request to server", err)
 		return
 	}
 	for {

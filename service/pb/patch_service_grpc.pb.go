@@ -22,10 +22,12 @@ type PatchClient interface {
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
 	// unary rpc - read/write rights check
 	RightsCheck(ctx context.Context, in *RightsCheckRequest, opts ...grpc.CallOption) (*RightsCheckResponse, error)
-	// client streaming rpc
+	// client streaming rpc - file upload in chunks
 	UploadFile(ctx context.Context, opts ...grpc.CallOption) (Patch_UploadFileClient, error)
-	// server streaming rpc
+	// server streaming rpc - applying patch
 	ApplyPatch(ctx context.Context, in *ApplyPatchRequest, opts ...grpc.CallOption) (Patch_ApplyPatchClient, error)
+	// server streaming rpc - verify patch
+	VerifyPatch(ctx context.Context, in *VerifyPatchRequest, opts ...grpc.CallOption) (Patch_VerifyPatchClient, error)
 }
 
 type patchClient struct {
@@ -120,6 +122,38 @@ func (x *patchApplyPatchClient) Recv() (*ApplyPatchResponse, error) {
 	return m, nil
 }
 
+func (c *patchClient) VerifyPatch(ctx context.Context, in *VerifyPatchRequest, opts ...grpc.CallOption) (Patch_VerifyPatchClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Patch_ServiceDesc.Streams[2], "/Patch/VerifyPatch", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &patchVerifyPatchClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Patch_VerifyPatchClient interface {
+	Recv() (*VerifyPatchResponse, error)
+	grpc.ClientStream
+}
+
+type patchVerifyPatchClient struct {
+	grpc.ClientStream
+}
+
+func (x *patchVerifyPatchClient) Recv() (*VerifyPatchResponse, error) {
+	m := new(VerifyPatchResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // PatchServer is the server API for Patch service.
 // All implementations must embed UnimplementedPatchServer
 // for forward compatibility
@@ -128,10 +162,12 @@ type PatchServer interface {
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
 	// unary rpc - read/write rights check
 	RightsCheck(context.Context, *RightsCheckRequest) (*RightsCheckResponse, error)
-	// client streaming rpc
+	// client streaming rpc - file upload in chunks
 	UploadFile(Patch_UploadFileServer) error
-	// server streaming rpc
+	// server streaming rpc - applying patch
 	ApplyPatch(*ApplyPatchRequest, Patch_ApplyPatchServer) error
+	// server streaming rpc - verify patch
+	VerifyPatch(*VerifyPatchRequest, Patch_VerifyPatchServer) error
 	mustEmbedUnimplementedPatchServer()
 }
 
@@ -150,6 +186,9 @@ func (UnimplementedPatchServer) UploadFile(Patch_UploadFileServer) error {
 }
 func (UnimplementedPatchServer) ApplyPatch(*ApplyPatchRequest, Patch_ApplyPatchServer) error {
 	return status.Errorf(codes.Unimplemented, "method ApplyPatch not implemented")
+}
+func (UnimplementedPatchServer) VerifyPatch(*VerifyPatchRequest, Patch_VerifyPatchServer) error {
+	return status.Errorf(codes.Unimplemented, "method VerifyPatch not implemented")
 }
 func (UnimplementedPatchServer) mustEmbedUnimplementedPatchServer() {}
 
@@ -247,6 +286,27 @@ func (x *patchApplyPatchServer) Send(m *ApplyPatchResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Patch_VerifyPatch_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(VerifyPatchRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(PatchServer).VerifyPatch(m, &patchVerifyPatchServer{stream})
+}
+
+type Patch_VerifyPatchServer interface {
+	Send(*VerifyPatchResponse) error
+	grpc.ServerStream
+}
+
+type patchVerifyPatchServer struct {
+	grpc.ServerStream
+}
+
+func (x *patchVerifyPatchServer) Send(m *VerifyPatchResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Patch_ServiceDesc is the grpc.ServiceDesc for Patch service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -272,6 +332,11 @@ var Patch_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "ApplyPatch",
 			Handler:       _Patch_ApplyPatch_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "VerifyPatch",
+			Handler:       _Patch_VerifyPatch_Handler,
 			ServerStreams: true,
 		},
 	},

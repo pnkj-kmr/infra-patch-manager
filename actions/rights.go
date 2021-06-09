@@ -27,7 +27,7 @@ func (a *Action) RightsCheckFor(remote string, apps []string) service.Remote {
 		return service.Remote{
 			Name:    c.Remote.Name,
 			Address: c.Remote.Address,
-			Status:  service.RemoteStatus{Ok: false, Err: err},
+			Status:  service.Status{Ok: false, Err: err.Error()},
 			Apps:    append(targetApps, notExistsApps...),
 		}
 	}
@@ -35,7 +35,7 @@ func (a *Action) RightsCheckFor(remote string, apps []string) service.Remote {
 	return service.Remote{
 		Name:    c.Remote.Name,
 		Address: c.Remote.Address,
-		Status:  service.RemoteStatus{Ok: len(notExistsApps) == 0, Err: err},
+		Status:  service.Status{Ok: len(notExistsApps) == 0, Err: err.Error()},
 		Apps:    append(res, notExistsApps...),
 	}
 }
@@ -57,7 +57,7 @@ func (a *Action) RightsCheckForAll(apptype string) (out []service.Remote) {
 				Name:    c.Remote.Name,
 				Address: c.Remote.Address,
 				Apps:    c.Remote.Apps,
-				Status:  service.RemoteStatus{Ok: false, Err: err},
+				Status:  service.Status{Ok: false, Err: err.Error()},
 			})
 			continue
 		}
@@ -69,7 +69,7 @@ func (a *Action) RightsCheckForAll(apptype string) (out []service.Remote) {
 				Name:    c.Remote.Name,
 				Address: c.Remote.Address,
 				Apps:    c.Remote.Apps,
-				Status:  service.RemoteStatus{Ok: false, Err: err},
+				Status:  service.Status{Ok: false, Err: err.Error()},
 			})
 			continue
 		}
@@ -78,7 +78,7 @@ func (a *Action) RightsCheckForAll(apptype string) (out []service.Remote) {
 			Name:    c.Remote.Name,
 			Address: c.Remote.Address,
 			Apps:    res,
-			Status:  service.RemoteStatus{Ok: true, Err: err},
+			Status:  service.Status{Ok: true},
 		})
 	}
 	return

@@ -15,7 +15,7 @@ func isAppExistsInRemote(r service.Remote, apppath string) (out service.RemoteAp
 		}
 	}
 	err = status.Error(codes.InvalidArgument, "App does not exist in remote")
-	return service.RemoteApp{Source: apppath, Status: service.RemoteStatus{Ok: false, Err: err}}, err
+	return service.RemoteApp{Source: apppath, Status: service.Status{Ok: false, Err: err.Error()}}, err
 }
 
 func getAppsByItsType(r service.Remote, apptype string) (out []service.RemoteApp, err error) {

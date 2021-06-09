@@ -30,6 +30,21 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/apply/patch": {
+            "post": {
+                "description": "apply patch to remote server app(s)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Patch"
+                ],
+                "summary": "apply patch to remote server app(s)"
+            }
+        },
         "/api/check": {
             "get": {
                 "description": "Endpoint check with formal api call",
@@ -170,6 +185,45 @@ var doc = `{
                         }
                     }
                 }
+            }
+        },
+        "/api/upload/patch/{name}": {
+            "post": {
+                "description": "uploading the patch to server",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Patch"
+                ],
+                "summary": "uploading file to server",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Remote Name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/api/verify/patch": {
+            "post": {
+                "description": "verifying the applied server app patch",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Patch"
+                ],
+                "summary": "verifying the applied server app patch"
             }
         }
     }

@@ -159,3 +159,38 @@ func (p *PatchServer) ApplyPatch(req *pb.ApplyPatchRequest, stream pb.Patch_Appl
 	}
 	return
 }
+
+// VerifyPatch helps to verify patch at given remote applications with server-streaming
+func (p *PatchServer) VerifyPatch(req *pb.VerifyPatchRequest, stream pb.Patch_VerifyPatchServer) (err error) {
+	apps := req.GetRemoteApps()
+	log.Println("Verify patch request receieved for apps", apps)
+
+	found := func(r string, v bool, d []*pb.FILE) error {
+		res := &pb.VerifyPatchResponse{
+			RemoteApp: r, Verified: v, Data: d,
+		}
+		err := stream.Send(res)
+		if err != nil {
+			return service.LogError(status.Errorf(codes.Unknown, "cannot sent data: %v", err))
+		}
+		log.Println("VERIFY PATCH applied for remote app:", res.GetRemoteApp(), ", Verified patch:", strconv.FormatBool(res.GetVerified()))
+		return nil
+	}
+
+	for _, path := range apps {
+		// checking upload is cancel by send
+		err := service.ContextError(stream.Context())
+		if err != nil {
+			return err
+		}
+		files, verified, err := verifyPatch(path)
+		if err != nil {
+			return err
+		}
+		err = found(path, verified, files)
+		if err != nil {
+			return err
+		}
+	}
+	return
+}

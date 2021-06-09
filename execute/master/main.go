@@ -32,13 +32,12 @@ func main() {
 	// Define a new Fiber app with config.
 	app := fiber.New(fiberConfig)
 
-	// Middlewares.
-	restapi.FiberMiddleware(app) // Register Fiber's default middleware
+	// Middlewares - TODOs
+	// restapi.FiberMiddleware(app) // Register Fiber's default middleware
 
 	// Routes.
-	restapi.SwaggerRoute(app) // Register a route for API Docs (Swagger).
-	restapi.PublicRoutes(app) // Register a public routes for app.
-	// server.PrivateRoutes(app) 	// Register a private routes for app.
+	restapi.SwaggerRoute(app)  // Register a route for API Docs (Swagger).
+	restapi.PublicRoutes(app)  // Register a public routes for app.
 	restapi.NotFoundRoute(app) // Register route for 404 Error.
 
 	// Start server (with graceful shutdown).

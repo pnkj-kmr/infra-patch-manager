@@ -6,6 +6,7 @@ import "ping_message.proto";
 import "upload_message.proto";
 import "apply_message.proto";
 import "check_message.proto";
+import "verify_message.proto";
 
 
 service Patch {
@@ -13,8 +14,10 @@ service Patch {
     rpc Ping(PingRequest) returns (PingResponse) {};
     // unary rpc - read/write rights check
     rpc RightsCheck(RightsCheckRequest) returns (RightsCheckResponse) {};
-    // client streaming rpc
+    // client streaming rpc - file upload in chunks
     rpc UploadFile(stream UploadFileRequest) returns (UploadFileResponse) {};
-    // server streaming rpc
+    // server streaming rpc - applying patch
     rpc ApplyPatch(ApplyPatchRequest) returns (stream ApplyPatchResponse) {};
+    // server streaming rpc - verify patch
+    rpc VerifyPatch(VerifyPatchRequest) returns (stream VerifyPatchResponse) {};
 }
