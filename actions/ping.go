@@ -26,14 +26,15 @@ func (a *Action) PingToAll(msg string) (out []*service.Remote) {
 	var mutex = &sync.Mutex{}
 	data := a.r.GetAll()
 	wg.Add(len(data))
-	for _, c := range data {
+	for _, cc := range data {
 		// concurrency with mutli host environment
 		go func(r *[]*service.Remote, c *client.Client, msg string) {
 			defer wg.Done()
+			res := getPingResult(c, msg)
 			mutex.Lock()
-			*r = append(*r, getPingResult(c, msg))
+			*r = append(*r, res)
 			mutex.Unlock()
-		}(&out, c, msg)
+		}(&out, cc, msg)
 	}
 	wg.Wait()
 	log.Println("PING: receieved response with data -", len(out), "T:", time.Since(start))

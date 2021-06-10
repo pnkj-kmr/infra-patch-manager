@@ -12,6 +12,8 @@ import (
 	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
 	"github.com/pnkj-kmr/infra-patch-manager/utility"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -79,12 +81,23 @@ func (c *Client) RightsCheck(apps []service.RemoteApp) (out []service.RemoteApp,
 	var app *pb.APP
 	for _, appinfo := range resApps {
 		app = appinfo.GetRemoteApp()
-		out = append(out, service.RemoteApp{
-			Name:    app.GetName(),
-			Source:  app.GetSource(),
-			Service: app.GetService(),
-			Status:  service.Status{Ok: appinfo.GetHasRights()},
-		})
+		hasrights := appinfo.GetHasRights()
+		if !hasrights {
+			err = status.Errorf(codes.Unknown, "App does not allow for read/write rights at %v", app.GetSource())
+			out = append(out, service.RemoteApp{
+				Name:    app.GetName(),
+				Source:  app.GetSource(),
+				Service: app.GetService(),
+				Status:  service.Status{Ok: hasrights, Err: err.Error()},
+			})
+		} else {
+			out = append(out, service.RemoteApp{
+				Name:    app.GetName(),
+				Source:  app.GetSource(),
+				Service: app.GetService(),
+				Status:  service.Status{Ok: hasrights},
+			})
+		}
 	}
 	return
 }

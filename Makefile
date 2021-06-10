@@ -30,7 +30,7 @@ agent:
 	go run execute/agent/main.go -port 8081
 
 master: swag
-	go run execute/master/main.go
+	go run -race execute/master/main.go
 
 test:
 	go test -cover -race ./...

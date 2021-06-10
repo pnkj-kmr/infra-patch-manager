@@ -37,6 +37,10 @@ func backupRevokeDir() (err error) {
 
 func rollbackFrom(target string) (err error) {
 	start := time.Now()
+	err = backupRevokeDir() // backup
+	if err != nil {
+		return err
+	}
 	err = cleanRevokeDir() // cleaning the dir
 	if err != nil {
 		return err
@@ -91,7 +95,6 @@ func rollbackFrom(target string) (err error) {
 			}
 		}
 	}
-	err = backupRevokeDir() // backup
 	log.Println("ROLLBACK FROM", target, "T:", time.Since(start))
 	return
 }

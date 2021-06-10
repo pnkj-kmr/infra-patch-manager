@@ -3,6 +3,8 @@ package actions
 import (
 	"fmt"
 	"log"
+	"sync"
+	"time"
 
 	"github.com/pnkj-kmr/infra-patch-manager/service"
 	"github.com/pnkj-kmr/infra-patch-manager/service/client"
@@ -25,11 +27,27 @@ func (a *Action) ApplyPatchTo(remote string, apptype string) (out []*ApplyResult
 }
 
 // ApplyPatchToAll defines the grpc Ping method call to all remotes
-func (a *Action) ApplyPatchToAll(apptype string) (out map[string][]*ApplyResult) {
-	out = make(map[string][]*ApplyResult)
-	for _, c := range a.r.GetAll() {
-		out[c.Remote.Name] = getApplyResult(c, apptype)
+func (a *Action) ApplyPatchToAll(apptype string) (out []*ApplyResult) {
+	start := time.Now()
+	// for _, c := range a.r.GetAll() {
+	// 	out = append(out, getApplyResult(c, apptype)...)
+	// }
+	var wg sync.WaitGroup
+	var mutex = &sync.Mutex{}
+	data := a.r.GetAll()
+	wg.Add(len(data))
+	for _, cc := range data {
+		// concurrency with mutli host environment
+		go func(r *[]*ApplyResult, c *client.Client, apptype string) {
+			defer wg.Done()
+			res := getApplyResult(c, apptype)
+			mutex.Lock()
+			*r = append(*r, res...)
+			mutex.Unlock()
+		}(&out, cc, apptype)
 	}
+	wg.Wait()
+	log.Println("PATCH: receieved response with data -", len(out), "T:", time.Since(start))
 	return
 }
 

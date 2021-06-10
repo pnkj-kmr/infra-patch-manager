@@ -3,6 +3,8 @@ package actions
 import (
 	"fmt"
 	"log"
+	"sync"
+	"time"
 
 	"github.com/pnkj-kmr/infra-patch-manager/module/dir"
 	"github.com/pnkj-kmr/infra-patch-manager/service"
@@ -27,14 +29,30 @@ func (a *Action) PatchFileUploadTo(remote, path string) (out *UploadResult) {
 }
 
 // PatchFileUploadToAll uploads the file to all remotes
-func (a *Action) PatchFileUploadToAll(path string) (out map[string]*UploadResult) {
+func (a *Action) PatchFileUploadToAll(path string) (out []*UploadResult) {
+	start := time.Now()
 	log.Println("UPLOAD: sending request data -", path)
-	out = make(map[string]*UploadResult)
-	for _, c := range a.r.GetAll() {
-		res := getUploadResult(c, path)
-		out[c.Remote.Name] = res
-		log.Println(c.Remote.Name, "UPLOAD: received response data -", res.File, res.Size)
+	// out = make(map[string]*UploadResult)
+	// for _, c := range a.r.GetAll() {
+	// 	res := getUploadResult(c, path)
+	// 	out[c.Remote.Name] = res
+	// }
+	var wg sync.WaitGroup
+	var mutex = &sync.Mutex{}
+	data := a.r.GetAll()
+	wg.Add(len(data))
+	for _, clt := range data {
+		// concurrency with mutli host environment
+		go func(r *[]*UploadResult, c *client.Client, path string) {
+			defer wg.Done()
+			res := getUploadResult(c, path)
+			mutex.Lock()
+			*r = append(*r, res)
+			mutex.Unlock()
+		}(&out, clt, path)
 	}
+	wg.Wait()
+	log.Println("UPLOAD: time taken -", time.Since(start))
 	return
 }
 
