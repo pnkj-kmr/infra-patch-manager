@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "./rpc/pb";
+
+import "ping_message.proto";
+import "upload_message.proto";
+import "apply_message.proto";
+import "check_message.proto";
+import "verify_message.proto";
+import "extract_message.proto";
+import "cmd_message.proto";
+
+service Patch {
+  // unary rpc - ping status check
+  rpc Ping(PingReq) returns(PingResp){};
+  // unary rpc - read/write rights check
+  rpc Checks(RightsReq) returns(RightsResp){};
+  // client streaming rpc - file upload in chunks
+  rpc Upload(stream UploadReq) returns(UploadResp){};
+  // unary rpc - extract file
+  rpc Extract(ExtractReq) returns(ExtractResp){};
+  // server streaming rpc - applying patch
+  rpc Apply(ApplyReq) returns(stream ApplyResp){};
+  // server streaming rpc - verify patch
+  rpc Verify(VerifyReq) returns(stream VerifyResp){};
+  // unary rpc - cmd
+  rpc Execute(CmdReq) returns(CmdResp){};
+}

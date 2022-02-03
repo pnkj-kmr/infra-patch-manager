@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "./rpc/pb";
+
+import "app_message.proto";
+
+message RightsInfo {
+  APP app = 1;
+  bool ok = 2;
+}
+
+message RightsReq { repeated APP applications = 1; }
+
+message RightsResp { repeated RightsInfo applications = 1; }

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option go_package = "./rpc/pb";
+
+import "google/protobuf/timestamp.proto";
+
+message FILE {
+  string name = 1;
+  int64 size = 2;
+  bool isdir = 3;
+  string path = 4;
+  google.protobuf.Timestamp time = 5;
+}

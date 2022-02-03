@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "./rpc/pb";
+
+import "file_message.proto";
+
+message FileInfo {
+  string file_name = 1;
+  string file_ext = 2;
+  FILE file_info = 3;
+}
+
+message UploadReq {
+  oneof data {
+    FileInfo info = 1;
+    bytes chunk_data = 2;
+  };
+}
+
+message UploadResp { FileInfo info = 1; }

@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+option go_package = "./rpc/pb";
+
+message PingReq { string msg = 1; }
+
+message PingResp { string msg = 1; }

@@ -1,0 +1,93 @@
+[
+  {
+    "name": "remote1",
+    "type": "pres",
+    "agent_address": "0.0.0.0:8081",
+    "apps": [
+      {
+        "type": "dc",
+        "name": "app1",
+        "source": "/tmp/patch/app1",
+        "service": "app1",
+        "port": "8001"
+      },
+      {
+        "type": "dc",
+        "name": "app2",
+        "source": "/tmp/patch/app2",
+        "service": "app2",
+        "port": "8002"
+      },
+      {
+        "type": "app",
+        "name": "app3",
+        "source": "/tmp/patch/app3",
+        "service": "app3",
+        "port": "8003"
+      }
+    ]
+  },
+  {
+    "name": "remote2",
+    "type": "notifier",
+    "agent_address": "0.0.0.0:8082",
+    "apps": [
+      {
+        "type": "dc",
+        "name": "app4",
+        "source": "/tmp/patch/app4",
+        "service": "app4",
+        "port": "8004"
+      },
+      {
+        "type": "dc",
+        "name": "app5",
+        "source": "/tmp/patch/app5",
+        "service": "app5",
+        "port": "8005"
+      },
+      {
+        "type": "app",
+        "name": "app6",
+        "source": "/tmp/patch/app6",
+        "service": "app6",
+        "port": "8006"
+      }
+    ]
+  },
+  {
+    "name": "remote3",
+    "type": "dc",
+    "agent_address": "0.0.0.0:8083",
+    "apps": [
+      {
+        "type": "dc",
+        "name": "app7",
+        "source": "/tmp/patch/app7",
+        "service": "app7",
+        "port": "8007"
+      },
+      {
+        "type": "dc",
+        "name": "app8",
+        "source": "/tmp/patch/app8",
+        "service": "app8",
+        "port": "8008"
+      }
+    ]
+  },
+  {
+    "name": "remote4",
+    "type": "dc",
+    "agent_address": "0.0.0.0:8084",
+    "apps": [
+      {
+        "type": "dc",
+        "name": "app9",
+        "source": "/tmp/patch/app9",
+        "service": "app9",
+        "port": "8001"
+      }
+    ]
+  }
+]

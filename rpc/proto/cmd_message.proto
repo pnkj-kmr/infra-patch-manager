@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option go_package = "./rpc/pb";
+
+message CmdReq { string cmd = 1; }
+
+message CmdResp {
+  bytes out = 1;
+  string err = 2;
+}

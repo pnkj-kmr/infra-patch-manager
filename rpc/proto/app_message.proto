@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option go_package = "./rpc/pb";
+
+message APP {
+  string name = 1;
+  string source = 2;
+  string service = 3;
+}

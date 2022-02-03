@@ -1,0 +1,8 @@
+**/*.tar*
+tmp*
+.DS_Store
+.vscode
+build
+TODO
+resources/
+dist/
