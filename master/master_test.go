@@ -4,11 +4,6 @@ package master_test
 // 	"context"
 // 	"net"
 // 	"testing"
-
-// 	"github.com/pnkj-kmr/infra-patch-manager/service/pb"
-// 	"github.com/pnkj-kmr/infra-patch-manager/service/server"
-// 	"github.com/stretchr/testify/require"
-// 	"google.golang.org/grpc"
 // )
 
 // func TestPingClient(t *testing.T) {

@@ -22,7 +22,7 @@ func NewTar(name string, ext string, path string) Tar {
 	if path != "" {
 		return &_tar{Name: name, Ext: ext, Path: path}
 	}
-	return &_tar{Name: name, Ext: ext, Path: "asset"}
+	return &_tar{Name: name, Ext: ext, Path: ""}
 }
 
 // tarFilePath represent the full path of tar/tar.gz file
@@ -122,8 +122,7 @@ func (t *_tar) Untar(extractPath string) (err error) {
 	}
 
 	tarBallReader := tar.NewReader(fr)
-
-	var skipBaseDir string
+	// var skipBaseDir string
 	for {
 		header, err := tarBallReader.Next()
 		if err != nil {
@@ -133,18 +132,19 @@ func (t *_tar) Untar(extractPath string) (err error) {
 			return err
 		}
 
-		if skipBaseDir == "" {
-			if strings.Split(header.Name, string(os.PathSeparator))[0] == rollbackPath {
-				skipBaseDir = rollbackPath
-			}
-		}
+		// This code specific to source dir - as
+		// if skipBaseDir == "" {
+		// 	if strings.Split(header.Name, string(os.PathSeparator))[0] == "source" {
+		// 		skipBaseDir = "source"
+		// 	}
+		// }
+		// rpath, err := filepath.Rel(skipBaseDir, header.Name)
+		// if err != nil {
+		// 	return err
+		// }
+		// filename := filepath.Join(extractPath, filepath.FromSlash(rpath))
 
-		rpath, err := filepath.Rel(skipBaseDir, header.Name)
-		if err != nil {
-			return err
-		}
-
-		filename := filepath.Join(extractPath, filepath.FromSlash(rpath))
+		filename := filepath.Join(extractPath, filepath.FromSlash(header.Name))
 
 		switch header.Typeflag {
 		case tar.TypeDir:

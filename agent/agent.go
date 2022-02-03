@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -28,19 +29,19 @@ func NewPatchAgent(path string, isBackup bool) (PatchAgent, error) {
 	if err != nil {
 		return nil, err
 	}
-	assets, err := entity.NewDir(entity.C.AssetPath)
+	assets, err := entity.NewDir(entity.C.AssetPath())
 	if err != nil {
 		log.Println("Assets folder does not exist or any", err)
 		return nil, err
 	}
-	patch, err := entity.NewDir(entity.C.PatchPath)
+	patch, err := entity.NewDir(entity.C.PatchPath())
 	if err != nil {
 		log.Println("Patch folder does not exist or any", err)
 		return nil, err
 	}
 	var rollback entity.Dir
 	if isBackup {
-		rollback, err = entity.NewDir(entity.C.RollbackPath)
+		rollback, err = entity.NewDir(entity.C.RollbackPath())
 		if err != nil {
 			log.Println("Rollback folder does not exist or any", err)
 			return nil, err
@@ -257,4 +258,25 @@ func (a *_agent) VerifyExtracted() (files []entity.File, ok bool, err error) {
 	ok = true // todo - cross check file count if needed
 	log.Println("PATCH VERIFED: ", a.target.Path(), "OK:", ok, "T:", time.Since(start))
 	return
+}
+
+func (a *_agent) ListAssets() (out []entity.Entity, err error) {
+	start := time.Now()
+	files, err := a.assets.Scan()
+	if err != nil {
+		log.Println("Unable to scan assets folder", err)
+		return
+	}
+	var s entity.MultiEntity
+	for _, f := range files {
+		s = append(s, f)
+	}
+	sort.Sort(s)
+	c := 0
+	if len(s) > 10 {
+		c = len(s) - 10
+	}
+	out = s[c:]
+	log.Println("LIST: found", a.assets.Path(), len(s), len(out), "T:", time.Since(start))
+	return out, nil
 }

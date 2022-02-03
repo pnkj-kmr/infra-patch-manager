@@ -32,6 +32,8 @@ type PatchClient interface {
 	Verify(ctx context.Context, in *VerifyReq, opts ...grpc.CallOption) (Patch_VerifyClient, error)
 	// unary rpc - cmd
 	Execute(ctx context.Context, in *CmdReq, opts ...grpc.CallOption) (*CmdResp, error)
+	// unary rpc - cmd
+	ListUploaded(ctx context.Context, in *ListUploadedReq, opts ...grpc.CallOption) (*ListUploadedResp, error)
 }
 
 type patchClient struct {
@@ -176,6 +178,15 @@ func (c *patchClient) Execute(ctx context.Context, in *CmdReq, opts ...grpc.Call
 	return out, nil
 }
 
+func (c *patchClient) ListUploaded(ctx context.Context, in *ListUploadedReq, opts ...grpc.CallOption) (*ListUploadedResp, error) {
+	out := new(ListUploadedResp)
+	err := c.cc.Invoke(ctx, "/Patch/ListUploaded", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PatchServer is the server API for Patch service.
 // All implementations must embed UnimplementedPatchServer
 // for forward compatibility
@@ -194,6 +205,8 @@ type PatchServer interface {
 	Verify(*VerifyReq, Patch_VerifyServer) error
 	// unary rpc - cmd
 	Execute(context.Context, *CmdReq) (*CmdResp, error)
+	// unary rpc - cmd
+	ListUploaded(context.Context, *ListUploadedReq) (*ListUploadedResp, error)
 	mustEmbedUnimplementedPatchServer()
 }
 
@@ -221,6 +234,9 @@ func (UnimplementedPatchServer) Verify(*VerifyReq, Patch_VerifyServer) error {
 }
 func (UnimplementedPatchServer) Execute(context.Context, *CmdReq) (*CmdResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Execute not implemented")
+}
+func (UnimplementedPatchServer) ListUploaded(context.Context, *ListUploadedReq) (*ListUploadedResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUploaded not implemented")
 }
 func (UnimplementedPatchServer) mustEmbedUnimplementedPatchServer() {}
 
@@ -375,6 +391,24 @@ func _Patch_Execute_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Patch_ListUploaded_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUploadedReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PatchServer).ListUploaded(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Patch/ListUploaded",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PatchServer).ListUploaded(ctx, req.(*ListUploadedReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Patch_ServiceDesc is the grpc.ServiceDesc for Patch service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -397,6 +431,10 @@ var Patch_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Execute",
 			Handler:    _Patch_Execute_Handler,
+		},
+		{
+			MethodName: "ListUploaded",
+			Handler:    _Patch_ListUploaded_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

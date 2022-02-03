@@ -14,4 +14,5 @@ type PatchMaster interface {
 	PatchTo([]remote.App) ([]remote.App, error)
 	VerifyFrom([]remote.App) ([]remote.App, error)
 	ExecuteCmdOnRemote(string) ([]byte, error)
+	ListAvailablePatches() ([]string, error)
 }

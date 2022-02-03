@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 
-	"github.com/pnkj-kmr/infra-patch-manager/exec/cli"
+	"github.com/pnkj-kmr/infra-patch-manager/endpoint/cli"
 )
 
 func main() {
@@ -36,9 +36,4 @@ func main() {
 	default:
 		cli.DefaultHelp()
 	}
-
-	// remotes := remote.GetRemotes()
-	// for _, r := range remotes {
-	// 	fmt.Println("REMOTE: ", r.Name(), r.AgentAddress())
-	// }
 }

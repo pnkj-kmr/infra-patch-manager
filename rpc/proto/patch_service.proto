@@ -25,4 +25,6 @@ service Patch {
   rpc Verify(VerifyReq) returns(stream VerifyResp){};
   // unary rpc - cmd
   rpc Execute(CmdReq) returns(CmdResp){};
+  // unary rpc - cmd
+  rpc ListUploaded(ListUploadedReq) returns(ListUploadedResp){};
 }

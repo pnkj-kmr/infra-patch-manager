@@ -40,4 +40,16 @@ func main() {
 
 	// out, err := entity.ExecuteCmd("ps -a")
 	// fmt.Println(string(out), err)
+
+	// f := "x.tar.gz"
+	// tar := entity.NewTar("", f, entity.C.AssetPath())
+	// err := tar.Untar(entity.C.PatchPath())
+	// fmt.Println(err)
+
+	// pa, err := agent.NewPatchAgent("tmp", false)
+	// fmt.Println(">>>>", pa, err)
+	// out, err := pa.ListAssets()
+	// fmt.Println(">>>>", out, err)
+	// fmt.Println(len(out))
+
 }

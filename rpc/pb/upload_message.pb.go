@@ -210,6 +210,91 @@ func (x *UploadResp) GetInfo() *FileInfo {
 	return nil
 }
 
+type ListUploadedReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ListUploadedReq) Reset() {
+	*x = ListUploadedReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_upload_message_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListUploadedReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUploadedReq) ProtoMessage() {}
+
+func (x *ListUploadedReq) ProtoReflect() protoreflect.Message {
+	mi := &file_upload_message_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUploadedReq.ProtoReflect.Descriptor instead.
+func (*ListUploadedReq) Descriptor() ([]byte, []int) {
+	return file_upload_message_proto_rawDescGZIP(), []int{3}
+}
+
+type ListUploadedResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Items []string `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+}
+
+func (x *ListUploadedResp) Reset() {
+	*x = ListUploadedResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_upload_message_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListUploadedResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUploadedResp) ProtoMessage() {}
+
+func (x *ListUploadedResp) ProtoReflect() protoreflect.Message {
+	mi := &file_upload_message_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUploadedResp.ProtoReflect.Descriptor instead.
+func (*ListUploadedResp) Descriptor() ([]byte, []int) {
+	return file_upload_message_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ListUploadedResp) GetItems() []string {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
 var File_upload_message_proto protoreflect.FileDescriptor
 
 var file_upload_message_proto_rawDesc = []byte{
@@ -230,8 +315,12 @@ var file_upload_message_proto_rawDesc = []byte{
 	0x61, 0x42, 0x06, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x22, 0x2b, 0x0a, 0x0a, 0x55, 0x70, 0x6c,
 	0x6f, 0x61, 0x64, 0x52, 0x65, 0x73, 0x70, 0x12, 0x1d, 0x0a, 0x04, 0x69, 0x6e, 0x66, 0x6f, 0x18,
 	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x46, 0x69, 0x6c, 0x65, 0x49, 0x6e, 0x66, 0x6f,
-	0x52, 0x04, 0x69, 0x6e, 0x66, 0x6f, 0x42, 0x0a, 0x5a, 0x08, 0x2e, 0x2f, 0x72, 0x70, 0x63, 0x2f,
-	0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x04, 0x69, 0x6e, 0x66, 0x6f, 0x22, 0x11, 0x0a, 0x0f, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x70,
+	0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x52, 0x65, 0x71, 0x22, 0x28, 0x0a, 0x10, 0x4c, 0x69, 0x73,
+	0x74, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x52, 0x65, 0x73, 0x70, 0x12, 0x14, 0x0a,
+	0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x05, 0x69, 0x74,
+	0x65, 0x6d, 0x73, 0x42, 0x0a, 0x5a, 0x08, 0x2e, 0x2f, 0x72, 0x70, 0x63, 0x2f, 0x70, 0x62, 0x62,
+	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -246,15 +335,17 @@ func file_upload_message_proto_rawDescGZIP() []byte {
 	return file_upload_message_proto_rawDescData
 }
 
-var file_upload_message_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_upload_message_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_upload_message_proto_goTypes = []interface{}{
-	(*FileInfo)(nil),   // 0: FileInfo
-	(*UploadReq)(nil),  // 1: UploadReq
-	(*UploadResp)(nil), // 2: UploadResp
-	(*FILE)(nil),       // 3: FILE
+	(*FileInfo)(nil),         // 0: FileInfo
+	(*UploadReq)(nil),        // 1: UploadReq
+	(*UploadResp)(nil),       // 2: UploadResp
+	(*ListUploadedReq)(nil),  // 3: ListUploadedReq
+	(*ListUploadedResp)(nil), // 4: ListUploadedResp
+	(*FILE)(nil),             // 5: FILE
 }
 var file_upload_message_proto_depIdxs = []int32{
-	3, // 0: FileInfo.file_info:type_name -> FILE
+	5, // 0: FileInfo.file_info:type_name -> FILE
 	0, // 1: UploadReq.info:type_name -> FileInfo
 	0, // 2: UploadResp.info:type_name -> FileInfo
 	3, // [3:3] is the sub-list for method output_type
@@ -307,6 +398,30 @@ func file_upload_message_proto_init() {
 				return nil
 			}
 		}
+		file_upload_message_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListUploadedReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_upload_message_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListUploadedResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_upload_message_proto_msgTypes[1].OneofWrappers = []interface{}{
 		(*UploadReq_Info)(nil),
@@ -318,7 +433,7 @@ func file_upload_message_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_upload_message_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

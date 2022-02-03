@@ -19,7 +19,6 @@ func HandleUpload(cmd *flag.FlagSet) {
 	// getting a handler
 	cliHandler := NewCLIHander(cmd, "Try remote with src input")
 
-	fmt.Println()
 	var f entity.File
 	if *path != "" {
 		f = checkPath(path)
@@ -43,7 +42,7 @@ func checkPath(path *string) entity.File {
 	}
 	f, err := entity.NewFile(*path, wd)
 	if err != nil {
-		fmt.Printf("Error	: %s - not exists\n", *path)
+		fmt.Printf("Error	: %s - not exists - %v\n", *path, err)
 		os.Exit(0)
 	}
 	if f.IsDir() {
@@ -54,6 +53,7 @@ func checkPath(path *string) entity.File {
 }
 
 func uploadToRemotes(allRemotes []remote.Remote, f entity.File) {
+	fmt.Println()
 	for _, r := range allRemotes {
 		pm, err := master.NewPatchMaster(r.Name(), false)
 		if err == nil {
@@ -71,8 +71,8 @@ func uploadToRemotes(allRemotes []remote.Remote, f entity.File) {
 }
 
 func printRemoteUpload(r remote.Remote, in entity.File, out entity.Entity, ok bool) {
-	fmt.Printf("Name		: %s [%s]		-- %s\n", r.Name(), r.Type(), iif(r.Status(), "OK", "NOT REACHABLE"))
-	fmt.Printf("Uploaded	: %s [%d]		%s\n", in.Name(), in.Size(), iif(ok, "UPLOADED", "FAILED"))
+	fmt.Printf("Remote name	: %s [%s]		%s\n", r.Name(), r.Type(), iif(r.Status(), greenText("--- OK"), redText("--- NOT REACHABLE")))
+	fmt.Printf("Uploaded	: %s [%d]		%s\n", yellowText(in.Name()), in.Size(), iif(ok, greenText("UPLOADED"), redText("FAILED")))
 	if ok {
 		fmt.Printf("	Name	: %s\n", out.Name())
 		fmt.Printf("	Size	: %d\n", out.Size())

@@ -8,7 +8,7 @@ before:
     # you may remove this if you don't need go generate
     - go generate ./...
 builds:
-  - main: ./exec/cli/agent
+  - main: ./endpoint/cli/agent
     id: "agent"
     binary: infrapm_agent
     goos:
@@ -17,7 +17,7 @@ builds:
     env:
       - CGO_ENABLED=0
 
-  - main: ./exec/cli/master
+  - main: ./endpoint/cli/master
     id: "master"
     binary: infrapm
     goos:

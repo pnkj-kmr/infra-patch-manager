@@ -264,3 +264,16 @@ func (m *_master) ExecuteCmdOnRemote(in string) (out []byte, err error) {
 	m.log(m.remote.Name(), "EXECUTE: receieved response data:", string(out), err)
 	return
 }
+
+func (m *_master) ListAvailablePatches() (out []string, err error) {
+	m.log(m.remote.Name(), "LIST: request with data request: ")
+	req := &pb.ListUploadedReq{}
+	res, err := m.connect.ListUploaded(context.Background(), req)
+	if err != nil {
+		m.log(m.remote.Name(), "EXECUTE: request failed:", err)
+		return
+	}
+	out = res.GetItems()
+	m.log(m.remote.Name(), "LIST: receieved response data:", len(out), err)
+	return
+}

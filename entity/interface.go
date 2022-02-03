@@ -38,3 +38,10 @@ type Tar interface {
 	Tar([]string) error
 	Untar(string) error
 }
+
+// Conf help to deal with configuration default
+type Conf interface {
+	AssetPath() string
+	PatchPath() string
+	RollbackPath() string
+}

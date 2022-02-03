@@ -18,3 +18,6 @@ message UploadReq {
 }
 
 message UploadResp { FileInfo info = 1; }
+
+message ListUploadedReq {}
+message ListUploadedResp { repeated string items = 1; }

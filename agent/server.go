@@ -24,7 +24,7 @@ type _ps struct {
 
 // NewPatchServer returns a new ping server
 func NewPatchServer() pb.PatchServer {
-	a, err := NewPatchAgent(entity.C.AssetPath, false)
+	a, err := NewPatchAgent(entity.C.AssetPath(), false)
 	if err != nil {
 		log.Fatal("Unable to locate conf path")
 		return nil
@@ -259,6 +259,20 @@ func (p *_ps) Execute(ctx context.Context, req *pb.CmdReq) (res *pb.CmdResp, err
 	res = &pb.CmdResp{
 		Out: out,
 		Err: e,
+	}
+	return
+}
+
+func (p *_ps) ListUploaded(ctx context.Context, req *pb.ListUploadedReq) (res *pb.ListUploadedResp, err error) {
+	log.Println("LIST: request receieved")
+	out, err := p.agentDefault.ListAssets()
+	log.Println("LIST: completed -", len(out), "\nerr:", err)
+	var items []string
+	for _, i := range out {
+		items = append(items, i.Name())
+	}
+	res = &pb.ListUploadedResp{
+		Items: items,
 	}
 	return
 }

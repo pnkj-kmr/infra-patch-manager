@@ -10,6 +10,21 @@ import (
 	"time"
 )
 
+// EnableAgentMode - basic setup for agent to run
+func EnableAgentMode() {
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatal("ERROR: ", err)
+	}
+	// Creating the default folders for applications
+	for _, d := range []string{resourceDir, assetsDir, patchDir, rollbackDir} {
+		_, err = CreateDirectoryIfNotExists(d)
+		if err != nil {
+			log.Fatal(filepath.Join(wd, d), "ERROR:", err)
+		}
+	}
+}
+
 // CreateDirectoryIfNotExists helps to create a dir if not exists and returns the dir path
 func CreateDirectoryIfNotExists(path string) (string, error) {
 	// creating the directories if not exists

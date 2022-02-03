@@ -20,7 +20,6 @@ type PatchAgent interface {
 	// patch file related
 	PatchExtract(string, string) error
 	VerifyExtracted() ([]entity.File, bool, error)
-	// // last rollback - apply if needed
-	// RollbackExtract(string, string) error
-	// VerifyRollbackExtracted() ([]entity.File, bool, error)
+	// List available patches
+	ListAssets() ([]entity.Entity, error)
 }

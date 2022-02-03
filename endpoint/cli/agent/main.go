@@ -7,11 +7,15 @@ import (
 	"net"
 
 	"github.com/pnkj-kmr/infra-patch-manager/agent"
+	"github.com/pnkj-kmr/infra-patch-manager/entity"
 	"github.com/pnkj-kmr/infra-patch-manager/rpc/pb"
 	"google.golang.org/grpc"
 )
 
 func main() {
+	// enabling the agent mode
+	entity.EnableAgentMode()
+
 	port := flag.Int("port", 8008, "the server port")
 	flag.Parse()
 	log.Printf("server start on port : %d", *port)
@@ -33,10 +37,4 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot start the grpc server agent ", err)
 	}
-
-	// d, err := jsn.GetRemotes()
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-	// log.Println(">>>>remotes", d)
 }
