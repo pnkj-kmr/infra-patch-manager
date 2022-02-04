@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pnkj-kmr/infra-patch-manager/master"
-	"github.com/pnkj-kmr/infra-patch-manager/remote"
+	"github.com/pnkj-kmr/infra-patch-manager/master/remote"
 )
 
 // HandleVerify - handler

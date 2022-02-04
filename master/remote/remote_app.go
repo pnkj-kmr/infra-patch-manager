@@ -32,6 +32,7 @@ func NewRemoteApp(name, remote string) (App, error) {
 
 func (a *_app) Name() string              { return a.AppName }
 func (a *_app) SourcePath() string        { return a.Source }
+func (a *_app) AppPort() string           { return a.Port }
 func (a *_app) ServiceName() string       { return a.Service }
 func (a *_app) Type() string              { return a.Apptype }
 func (a *_app) Status() bool              { return a._status }

@@ -2,7 +2,7 @@ package master
 
 import (
 	"github.com/pnkj-kmr/infra-patch-manager/entity"
-	"github.com/pnkj-kmr/infra-patch-manager/remote"
+	"github.com/pnkj-kmr/infra-patch-manager/master/remote"
 )
 
 // PatchMaster declare all master actions

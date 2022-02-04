@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/pnkj-kmr/infra-patch-manager/entity"
-	"github.com/pnkj-kmr/infra-patch-manager/remote"
+	"github.com/pnkj-kmr/infra-patch-manager/master/remote"
 	"github.com/pnkj-kmr/infra-patch-manager/rpc"
 	"github.com/pnkj-kmr/infra-patch-manager/rpc/pb"
 )
@@ -158,7 +158,7 @@ func (m *_master) RightsCheckFor(reqApps []remote.App) (apps []remote.App, err e
 	var rr []*pb.APP
 
 	for _, a := range reqApps {
-		rr = append(rr, rpc.RemoteAppToAPP(a))
+		rr = append(rr, m.RemoteAppToAPP(a))
 	}
 
 	req := &pb.RightsReq{
@@ -172,7 +172,7 @@ func (m *_master) RightsCheckFor(reqApps []remote.App) (apps []remote.App, err e
 
 	resApps := res.GetApplications()
 	for _, r := range resApps {
-		apps = append(apps, rpc.APPToRemoteApp(r.GetApp(), r.GetOk(), m.remote.Name(), nil))
+		apps = append(apps, m.APPToRemoteApp(r.GetApp(), r.GetOk(), m.remote.Name(), nil))
 	}
 	m.log(m.remote.Name(), "Rights receieved response with status")
 	return
@@ -183,7 +183,7 @@ func (m *_master) PatchTo(reqApps []remote.App) (apps []remote.App, err error) {
 	var rr []*pb.APP
 
 	for _, a := range reqApps {
-		rr = append(rr, rpc.RemoteAppToAPP(a))
+		rr = append(rr, m.RemoteAppToAPP(a))
 	}
 
 	req := &pb.ApplyReq{
@@ -207,7 +207,7 @@ func (m *_master) PatchTo(reqApps []remote.App) (apps []remote.App, err error) {
 
 		appInfo := res.GetApplications()
 		for _, x := range appInfo {
-			apps = append(apps, rpc.APPToRemoteApp(x.GetApp(), x.GetVerified(), m.remote.Name(), x.GetData()))
+			apps = append(apps, m.APPToRemoteApp(x.GetApp(), x.GetVerified(), m.remote.Name(), x.GetData()))
 		}
 	}
 
@@ -219,7 +219,7 @@ func (m *_master) VerifyFrom(reqApps []remote.App) (apps []remote.App, err error
 	var rr []*pb.APP
 
 	for _, a := range reqApps {
-		rr = append(rr, rpc.RemoteAppToAPP(a))
+		rr = append(rr, m.RemoteAppToAPP(a))
 	}
 
 	req := &pb.VerifyReq{
@@ -243,7 +243,7 @@ func (m *_master) VerifyFrom(reqApps []remote.App) (apps []remote.App, err error
 
 		appInfo := res.GetApplications()
 		for _, x := range appInfo {
-			apps = append(apps, rpc.APPToRemoteApp(x.GetApp(), x.GetVerified(), m.remote.Name(), x.GetData()))
+			apps = append(apps, m.APPToRemoteApp(x.GetApp(), x.GetVerified(), m.remote.Name(), x.GetData()))
 		}
 	}
 	return
@@ -276,4 +276,27 @@ func (m *_master) ListAvailablePatches() (out []string, err error) {
 	out = res.GetItems()
 	m.log(m.remote.Name(), "LIST: receieved response data:", len(out), err)
 	return
+}
+
+// RemoteAppToAPP - helps to convert
+func (m *_master) RemoteAppToAPP(r remote.App) *pb.APP {
+	return &pb.APP{Name: r.Name(), Source: r.SourcePath(), Service: r.ServiceName()}
+}
+
+// APPToRemoteApp - helps to convert
+func (m *_master) APPToRemoteApp(a *pb.APP, ok bool, r string, f []*pb.FILE) remote.App {
+	app, err := remote.NewRemoteApp(a.Name, r)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
+	app.UpdateStatus(ok)
+	if len(f) > 0 {
+		var ef []entity.Entity
+		for _, x := range f {
+			ef = append(ef, rpc.FILEToEntity(x))
+		}
+		app.UpdateFiles(ef)
+	}
+	return app
 }

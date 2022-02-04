@@ -20,6 +20,7 @@ type Remote interface {
 type App interface {
 	Name() string
 	Status() bool
+	AppPort() string
 	SourcePath() string
 	ServiceName() string
 	Type() string

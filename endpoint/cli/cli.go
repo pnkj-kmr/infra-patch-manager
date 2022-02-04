@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
-	"github.com/pnkj-kmr/infra-patch-manager/remote"
+	"github.com/pnkj-kmr/infra-patch-manager/master/remote"
 )
 
 // setting up the color for terminal output

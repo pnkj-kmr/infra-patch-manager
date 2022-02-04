@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/pnkj-kmr/infra-patch-manager/entity"
-	"github.com/pnkj-kmr/infra-patch-manager/remote"
 	"github.com/pnkj-kmr/infra-patch-manager/rpc/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -33,29 +32,6 @@ func LogError(err error) error {
 		log.Print(err)
 	}
 	return err
-}
-
-// RemoteAppToAPP - helps to convert
-func RemoteAppToAPP(r remote.App) *pb.APP {
-	return &pb.APP{Name: r.Name(), Source: r.SourcePath(), Service: r.ServiceName()}
-}
-
-// APPToRemoteApp - helps to convert
-func APPToRemoteApp(a *pb.APP, ok bool, r string, f []*pb.FILE) remote.App {
-	app, err := remote.NewRemoteApp(a.Name, r)
-	if err != nil {
-		log.Print(err)
-		return nil
-	}
-	app.UpdateStatus(ok)
-	if len(f) > 0 {
-		var ef []entity.Entity
-		for _, x := range f {
-			ef = append(ef, FILEToEntity(x))
-		}
-		app.UpdateFiles(ef)
-	}
-	return app
 }
 
 // EntityToFILE converts the desire object
