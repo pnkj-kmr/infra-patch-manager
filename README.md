@@ -25,20 +25,20 @@ _Copy the `infrapm_agent` file to destination application server. Same agent set
 scp infrapm_agent user@HOSTIP:/home/user/
 ```
 
-_after copying create a working directory for agent as_
+_After copying create a working directory for agent as_
 
 ```
 mkdir -p /opt/infrapm
 mv infrapm_agent /opt/infrapm/
 ```
 
-_create a linux service file as_
+_Create a linux service file as_
 
 ```
 vi /opt/infrapm/infrapm.service
 ```
 
-_use service file reference as: alter the running port if needed_
+_Use service file reference as: alter the running port if needed_
 
 ```
 [Unit]
@@ -54,7 +54,7 @@ ExecStop=
 WantedBy=multi-user.target
 ```
 
-_to enable the service for linux system. refer these steps as_
+_To enable the service for linux system. refer these steps as_
 
 ```
 cd /etc/systemd/system
@@ -62,7 +62,7 @@ ln -s /opt/infrapm/infrapm.service
 systemctl daemon-reload
 ```
 
-_start the infrapm agent as_
+_Start the infrapm agent as_
 
 ```
 systemctl start infrapm.service
@@ -110,11 +110,11 @@ _Copy the `infrapm` file at destination where application server(s) are reachabl
 ]
 ```
 
-_to test the infrapm master functionality by running as_
+_To test the infrapm master functionality by running as_
 
 > ./infrapm --help
 
-_expected output will be_
+_Expected output will be_
 
 ```
 Infra-Patch-Manager contains the following subcommands set.
