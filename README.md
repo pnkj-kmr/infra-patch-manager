@@ -15,9 +15,10 @@ _To setup the infrapm, taking reference server (Linux : x86_64). Download the la
 - `infrapm`
 - `infrapm_agent`
 
-##### **infrapm agent setup**
+_and LICENSE, README.md, conf/remotes.json(for reference) etc._
 
----
+#### SETUP AGENT
+***
 
 _Copy the `infrapm_agent` file to destination application server. Same agent setup steps will repeated for mutliple application servers. Copy on linux as_
 
@@ -78,9 +79,9 @@ _Make sure the infrapm agent working directory lies as follows_
         patch/
         rollback/
 
-##### **infrapm master setup**
 
----
+#### SETUP MASTER
+***
 
 _Copy the `infrapm` file at destination where application server(s) are reachable. And create a file as **conf/remotes.json** there as below, repeat servers and server applications configuration as needed._
 
@@ -119,13 +120,13 @@ _Expected output will be_
 ```
 Infra-Patch-Manager contains the following subcommands set.
 
-    remote  | list or search a remote detail with reachablity
-    rights  | read/write rights check on a remote's application(s)
-    upload  | upload a patch to remote
-    extract | untaring a tar.gz file on relative remote
-    apply   | applying a patch to relative remote application(s)
-    verify  | helps to validate an applied patch
-    exec    | Helps to execute cmd on remote(s)
+        remote          | list or search a remote detail with reachablity
+        rights          | read/write rights check on a remote's application(s)
+        upload          | upload a patch to remote
+        extract         | untaring a tar.gz file on relative remote
+        apply           | applying a patch to relative remote application(s)
+        verify          | helps to validate an applied patch
+        exec            | helps to execute commands on remote(s)
 
 ```
 
@@ -152,5 +153,7 @@ _As completed the setup of infrapm application in two phase agent (repeated inst
 > ./infrapm rights
 
 > ./infrapm rights --remote-all -app-all
+
+> ./infrapm extract -remote-all -list
 
 _Completed **:)**_
