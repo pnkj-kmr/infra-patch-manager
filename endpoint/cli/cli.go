@@ -84,7 +84,7 @@ func DefaultHelp() {
 	fmt.Println(greenText("	extract"), "	| untaring a tar.gz file on relative remote")
 	fmt.Println(greenText("	apply"), "		| applying a patch to relative remote application(s)")
 	fmt.Println(greenText("	verify"), "		| helps to validate an applied patch")
-	fmt.Println(greenText("	exec"), "		| Helps to execute cmd on remote(s)")
+	fmt.Println(greenText("	exec"), "		| helps to execute commands on remote(s)")
 	fmt.Print("\n\n")
 }
 
