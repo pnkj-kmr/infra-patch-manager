@@ -5,15 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fatih/color"
 	"github.com/pnkj-kmr/infra-patch-manager/master/remote"
 )
-
-// setting up the color for terminal output
-var greenText func(a ...interface{}) string = color.New(color.FgHiGreen).SprintFunc()
-var redText func(a ...interface{}) string = color.New(color.FgHiRed).SprintFunc()
-var yellowText func(a ...interface{}) string = color.New(color.FgYellow).SprintFunc()
-var yellowPrintf func(f string, a ...interface{}) = color.New(color.FgYellow).PrintfFunc()
 
 // CLI - helps to get the
 type CLI interface {
@@ -43,7 +36,7 @@ func (c *_cli) GetRemotes(name, rtype *string) (r []remote.Remote) {
 	if *name != "" {
 		rr, err := remote.NewRemote(*name)
 		if err != nil {
-			yellowPrintf("Given remote name does not exists. refer conf/remotes.json\n\n")
+			fmt.Printf("%s\n\n", yellowText("Given remote name does not exists. refer conf/remotes.json"))
 			os.Exit(0)
 		}
 		r = append(r, rr)
@@ -60,21 +53,21 @@ func (c *_cli) GetRemoteApps(r remote.Remote, name, apptype *string) (a []remote
 	if *name != "" {
 		app, err := r.App(*name)
 		if err != nil {
-			yellowPrintf("\n\nGiven remote application name does not exists. refer conf/remotes.json\n\n")
+			fmt.Printf("\n\n%s\n\n", yellowText("Given remote application name does not exists. refer conf/remotes.json"))
 			os.Exit(0)
 		}
 		a = append(a, app)
 	} else if *apptype != "" {
 		apps, err := r.AppByType(*apptype)
 		if err != nil {
-			yellowPrintf("\n\nInvalid type. refer conf/remotes.json\n\n")
+			fmt.Printf("\n\n%s\n\n", yellowText("Invalid type. refer conf/remotes.json"))
 			os.Exit(0)
 		}
 		a = apps
 	} else {
 		apps, err := r.Apps()
 		if err != nil {
-			yellowPrintf("Internal error. refer conf/remotes.json")
+			fmt.Printf(yellowText("Internal error. refer conf/remotes.json"))
 			os.Exit(0)
 		}
 		a = apps
@@ -98,7 +91,7 @@ func DefaultHelp() {
 func defaultRemoteCheck(r []remote.Remote) {
 	if len(r) == 0 {
 		fmt.Printf("Infra-Patch-Manager contains the subcommands set.\n\n")
-		yellowPrintf("	- No Remote configured. check conf/remotes.json\n\n\n")
+		fmt.Printf("	%s\n\n\n", yellowText("- No Remote configured. check conf/remotes.json"))
 		os.Exit(0)
 	}
 }

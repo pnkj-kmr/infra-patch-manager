@@ -154,11 +154,6 @@ func (a *_agent) VerifyPatched() (files []entity.File, ok bool, err error) {
 
 func (a *_agent) PatchRollback() (err error) {
 	start := time.Now()
-	// backing up the existing rollback if any
-	err = backupExistingRollback()
-	if err != nil {
-		return err
-	}
 
 	// cleaning the rollback directory
 	a.rollback.Clean()
@@ -200,6 +195,13 @@ func (a *_agent) PatchRollback() (err error) {
 			}
 		}
 	}
+
+	// backing up the rollback into assets
+	err = backupExistingRollback()
+	if err != nil {
+		return err
+	}
+
 	log.Println("ROLLBACK FROM: ", a.target.Path(), "T:", time.Since(start))
 	return
 }

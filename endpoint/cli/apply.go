@@ -49,7 +49,7 @@ func printApplyWithApps(r remote.Remote, ex []remote.App, apps []remote.App) {
 	fmt.Printf("Remote name	: %s [%s]		%s\n", r.Name(), r.Type(), iif(r.Status(), greenText("--- OK"), redText("--- NOT REACHABLE")))
 	fmt.Printf("Applications	: %d [requested: %d]\n", len(apps), len(ex))
 	if len(ex) == 0 {
-		yellowPrintf("	No application found. To more refer conf/remotes.json\n\n")
+		fmt.Printf("	%s\n\n", yellowText("No application found. To more refer conf/remotes.json"))
 	}
 	for i, a := range apps {
 		fmt.Printf("[%d]	%s	: [%s] %s		%s\n", i+1, a.Name(), a.Type(), a.SourcePath(), iif(a.Status(), greenText("APPLIED"), redText("NOT APPLIED")))
