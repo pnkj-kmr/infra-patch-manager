@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"text/tabwriter"
 
 	"github.com/pnkj-kmr/infra-patch-manager/master/remote"
 )
@@ -28,15 +29,24 @@ type _cli struct {
 
 func (c *_cli) DefaultHelp() {
 	fmt.Println("Infra-Patch-Manager subcommand <", c.cmd.Name(), "> holds below actions.", c.helpMsg)
+	fmt.Println()
 	c.cmd.PrintDefaults()
 	fmt.Printf("\n\n")
+}
+
+func defaultRemoteCheck(r []remote.Remote) {
+	if len(r) == 0 {
+		fmt.Printf("Infra-Patch-Manager contains the subcommands set.\n\n")
+		fmt.Printf("\t%s\n\n", yellowText("- No Remote configured. check conf/remotes.json"))
+		os.Exit(0)
+	}
 }
 
 func (c *_cli) GetRemotes(name, rtype *string) (r []remote.Remote) {
 	if *name != "" {
 		rr, err := remote.NewRemote(*name)
 		if err != nil {
-			fmt.Printf("%s\n\n", yellowText("Given remote name does not exists. refer conf/remotes.json"))
+			fmt.Printf("\n\t%s\n\n", yellowText("- Given remote name does not exists. refer conf/remotes.json"))
 			os.Exit(0)
 		}
 		r = append(r, rr)
@@ -53,21 +63,22 @@ func (c *_cli) GetRemoteApps(r remote.Remote, name, apptype *string) (a []remote
 	if *name != "" {
 		app, err := r.App(*name)
 		if err != nil {
-			fmt.Printf("\n\n%s\n\n", yellowText("Given remote application name does not exists. refer conf/remotes.json"))
-			os.Exit(0)
+			// fmt.Printf("\n\t%s\n\n", yellowText("- Given remote application name does not exists. refer conf/remotes.json"))
+			// os.Exit(0)
+			return a
 		}
 		a = append(a, app)
 	} else if *apptype != "" {
 		apps, err := r.AppByType(*apptype)
 		if err != nil {
-			fmt.Printf("\n\n%s\n\n", yellowText("Invalid type. refer conf/remotes.json"))
+			fmt.Printf("\n\t%s\n\n", yellowText("- Invalid type. refer conf/remotes.json"))
 			os.Exit(0)
 		}
 		a = apps
 	} else {
 		apps, err := r.Apps()
 		if err != nil {
-			fmt.Printf(yellowText("Internal error. refer conf/remotes.json"))
+			fmt.Printf("\n\t%s\n\n", yellowText("- Internal error. refer conf/remotes.json"))
 			os.Exit(0)
 		}
 		a = apps
@@ -77,30 +88,29 @@ func (c *_cli) GetRemoteApps(r remote.Remote, name, apptype *string) (a []remote
 
 // DefaultHelp - print all helps
 func DefaultHelp() {
+	format := "\t\t%v\t| %v\t\n"
+	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
 	fmt.Printf("Infra-Patch-Manager contains the following subcommands set.\n\n")
-	fmt.Println(greenText("	remote"), "		| list or search a remote detail with reachablity")
-	fmt.Println(greenText("	rights"), "		| read/write rights check on a remote's application(s)")
-	fmt.Println(greenText("	upload"), "		| upload a patch to remote")
-	fmt.Println(greenText("	extract"), "	| untaring a tar.gz file on relative remote")
-	fmt.Println(greenText("	apply"), "		| applying a patch to relative remote application(s)")
-	fmt.Println(greenText("	verify"), "		| helps to validate an applied patch")
-	fmt.Println(greenText("	exec"), "		| helps to execute commands on remote(s)")
+	fmt.Fprintf(tw, format, greenText("remote"), "list or search a remote detail with reachablity")
+	fmt.Fprintf(tw, format, greenText("rights"), "read/write rights check on a remote's application(s)")
+	fmt.Fprintf(tw, format, greenText("upload"), "upload a patch to remote")
+	fmt.Fprintf(tw, format, greenText("extract"), "untaring a tar.gz file on relative remote")
+	fmt.Fprintf(tw, format, greenText("apply"), "applying a patch to relative remote application(s)")
+	fmt.Fprintf(tw, format, greenText("verify"), "helps to validate an applied patch")
+	fmt.Fprintf(tw, format, greenText("exec"), "helps to execute commands on remote(s)")
+	tw.Flush()
 	fmt.Print("\n\n")
-}
-
-func defaultRemoteCheck(r []remote.Remote) {
-	if len(r) == 0 {
-		fmt.Printf("Infra-Patch-Manager contains the subcommands set.\n\n")
-		fmt.Printf("	%s\n\n\n", yellowText("- No Remote configured. check conf/remotes.json"))
-		os.Exit(0)
-	}
 }
 
 // DefaultCheck - helps to check basic
 func DefaultCheck() {
 	if len(os.Args) < 2 {
 		fmt.Printf("Infra-Patch-Manager contains the subcommands set. Follow help to know more.\n\n")
-		fmt.Printf("	-help		| to know more about subcommands\n\n")
+		format := "\t\t%v\t| %v\t\n"
+		tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
+		fmt.Fprintf(tw, format, greenText("help"), "to know more about subcommands")
+		tw.Flush()
+		fmt.Printf("\n\n")
 		os.Exit(0)
 	}
 }

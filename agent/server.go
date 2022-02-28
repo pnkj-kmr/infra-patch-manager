@@ -248,13 +248,22 @@ func (p *_ps) Verify(req *pb.VerifyReq, stream pb.Patch_VerifyServer) (err error
 }
 
 func (p *_ps) Execute(ctx context.Context, req *pb.CmdReq) (res *pb.CmdResp, err error) {
-	cmd := req.GetCmd()
-	log.Println("EXECUTE: request receieved - ", cmd)
-	out, err := entity.ExecuteCmd(cmd)
-	log.Println("EXECUTE: completed -", string(out), "\nerr:", err)
 	var e string
-	if err != nil {
-		e = err.Error()
+	var out []byte
+	cmd := req.GetCmd()
+	pass := req.GetPass()
+	log.Println("EXECUTE: request receieved - ", cmd, pass)
+	ok := entity.VerifyPasscode(pass)
+	if ok {
+		o, err := entity.ExecuteCmd(cmd)
+		out = o
+		log.Println("EXECUTE: completed -", string(out), "\nerr:", err)
+		if err != nil {
+			e = err.Error()
+		}
+	} else {
+		e = "INVALID PASSCODE"
+		log.Println("EXECUTE: completed with error - ", e)
 	}
 	res = &pb.CmdResp{
 		Out: out,

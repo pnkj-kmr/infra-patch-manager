@@ -16,12 +16,13 @@ import (
 )
 
 func main() {
-	// enabling the agent mode
-	entity.EnableAgentMode()
-
-	port := flag.Int("port", 8008, "the server port")
+	port := flag.Int("port", 8008, "the server starting port")
+	p := flag.String("passcode", "infrapm", "passcode - extra secure")
 	flag.Parse()
-	log.Printf("server start on port : %d", *port)
+	log.Printf("server start on port: %d [passcode: %s]", *port, *p)
+
+	// enabling the agent mode
+	entity.EnableAgentMode(p)
 
 	patch := agent.NewPatchServer()
 	grpcServer := grpc.NewServer()

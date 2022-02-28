@@ -13,6 +13,6 @@ type PatchMaster interface {
 	RightsCheckFor([]remote.App) ([]remote.App, error)
 	PatchTo([]remote.App) ([]remote.App, error)
 	VerifyFrom([]remote.App) ([]remote.App, error)
-	ExecuteCmdOnRemote(string) ([]byte, error)
+	ExecuteCmdOnRemote(string, string) ([]byte, error)
 	ListAvailablePatches() ([]string, error)
 }

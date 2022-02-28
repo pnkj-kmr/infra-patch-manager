@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+const skipRollbackPathIfExists = "rollback"
+
 // _tar declares tar declaration
 type _tar struct {
 	Name string
@@ -122,7 +124,7 @@ func (t *_tar) Untar(extractPath string) (err error) {
 	}
 
 	tarBallReader := tar.NewReader(fr)
-	// var skipBaseDir string
+	var skipBaseDir string
 	for {
 		header, err := tarBallReader.Next()
 		if err != nil {
@@ -132,19 +134,19 @@ func (t *_tar) Untar(extractPath string) (err error) {
 			return err
 		}
 
-		// This code specific to source dir - as
-		// if skipBaseDir == "" {
-		// 	if strings.Split(header.Name, string(os.PathSeparator))[0] == "source" {
-		// 		skipBaseDir = "source"
-		// 	}
-		// }
-		// rpath, err := filepath.Rel(skipBaseDir, header.Name)
-		// if err != nil {
-		// 	return err
-		// }
-		// filename := filepath.Join(extractPath, filepath.FromSlash(rpath))
+		// This code specific to source dir - as rollback if any
+		if skipBaseDir == "" {
+			if strings.Split(header.Name, string(os.PathSeparator))[0] == skipRollbackPathIfExists {
+				skipBaseDir = skipRollbackPathIfExists
+			}
+		}
+		rpath, err := filepath.Rel(skipBaseDir, header.Name)
+		if err != nil {
+			return err
+		}
+		filename := filepath.Join(extractPath, filepath.FromSlash(rpath))
 
-		filename := filepath.Join(extractPath, filepath.FromSlash(header.Name))
+		// filename := filepath.Join(extractPath, filepath.FromSlash(header.Name))
 
 		switch header.Typeflag {
 		case tar.TypeDir:

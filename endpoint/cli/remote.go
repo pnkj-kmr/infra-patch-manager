@@ -3,6 +3,8 @@ package cli
 import (
 	"flag"
 	"fmt"
+	"os"
+	"text/tabwriter"
 
 	"github.com/pnkj-kmr/infra-patch-manager/master"
 	"github.com/pnkj-kmr/infra-patch-manager/master/remote"
@@ -27,19 +29,22 @@ func HandleRemote(cmd *flag.FlagSet) {
 
 func printRemotes(remotes []remote.Remote, s bool) {
 	fmt.Println()
+	format := "%v\t%v\t\t\t%v\t\n"
+	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
 	for _, r := range remotes {
 		if s {
 			updateRemoteStatus(r)
 		}
 		apps, _ := r.Apps()
-		fmt.Printf("Name		: %s [%s]	%s\n", r.Name(), r.Type(), iif(s, iif(r.Status(), greenText("--- OK"), redText("--- NOT REACHABLE")), yellowText("--- STATUS NOT CHECKED")))
-		fmt.Printf("Agent		: %s\n", r.AgentAddress())
-		fmt.Printf("Applications	: %d\n", len(apps))
+		fmt.Fprintf(tw, format, "Remote Name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), iif(s, iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")), yellowText("...STATUS NOT CHECKED")))
+		fmt.Fprintf(tw, format, "Agent Address", r.AgentAddress(), "")
+		fmt.Fprintf(tw, format, "Applications", len(apps), "")
 		for i, a := range apps {
-			fmt.Printf("[%d]	%s	: [%s] %s\n", i+1, a.Name(), a.Type(), a.SourcePath())
+			fmt.Fprintf(tw, format, "", fmt.Sprintf("[%d] %s [%s] : %s", i+1, a.Name(), a.Type(), a.SourcePath()), "")
 		}
-		fmt.Println()
+		fmt.Fprintf(tw, format, "", "", "")
 	}
+	tw.Flush()
 }
 
 func updateRemoteStatus(r remote.Remote) {

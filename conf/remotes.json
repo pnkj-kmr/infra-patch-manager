@@ -82,7 +82,7 @@
     "agent_address": "0.0.0.0:8084",
     "apps": [
       {
-        "type": "dc",
+        "type": "xx",
         "name": "app9",
         "source": "/tmp/patch/app9",
         "service": "app9",

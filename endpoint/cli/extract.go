@@ -3,7 +3,8 @@ package cli
 import (
 	"flag"
 	"fmt"
-	"strings"
+	"os"
+	"text/tabwriter"
 
 	"github.com/pnkj-kmr/infra-patch-manager/entity"
 	"github.com/pnkj-kmr/infra-patch-manager/master"
@@ -54,30 +55,38 @@ func extractToRemote(allRemotes []remote.Remote, f string) {
 }
 
 func printRemoteExtract(r remote.Remote, name string, files []entity.Entity, ok bool) {
-	fmt.Printf("Remote name	: %s [%s]	%s\n", r.Name(), r.Type(), iif(r.Status(), greenText("--- OK"), redText("--- NOT REACHABLE")))
-	fmt.Printf("Extract		: %s		%s\n", name, iif(ok, greenText("EXTRACTED"), redText("FAILED")))
+	format := "%v\t%v\t\t\t%v\t\n"
+	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
+	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")))
+	fmt.Fprintf(tw, format, "Extract", name, iif(ok, greenText("EXTRACTED"), redText("FAILED")))
 	if ok {
 		for i, f := range files {
-			fmt.Printf("[%d]		  %s [%d] - %s\n", i+1, yellowText(f.Name()), f.Size(), f.Path())
+			fmt.Fprintf(tw, format, "", fmt.Sprintf("[%d]: %s [%d]", i+1, yellowText(f.Path()), f.Size()), "")
 		}
+	} else {
+		fmt.Fprintf(tw, format, "", redText("Unable to extract"), "")
 	}
+	tw.Flush()
 }
 
 func printExtractList(remotes []remote.Remote) {
 	fmt.Println()
+	format := "%v\t%v\t\t\t%v\t\n"
+	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
 	for _, r := range remotes {
 		out := extractRemoteList(r)
-		fmt.Printf("Remote name	: %s [%s]		%s\n", r.Name(), r.Type(), iif(r.Status(), greenText("--- OK"), redText("--- NOT REACHABLE")))
-		fmt.Println("List output:")
+		fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")))
 		if len(out) > 0 {
-			fmt.Println(strings.Repeat("-", 60))
 			for i, f := range out {
-				fmt.Printf("[%d]	%s\n", i+1, yellowText(f))
+				fmt.Fprintf(tw, format, iif(i == 0, "List output", ""), fmt.Sprintf("[%d] %s", i+1, yellowText(f)), "")
 			}
-			fmt.Println(strings.Repeat("-", 60))
+		} else {
+			fmt.Fprintf(tw, format, "", redText("Unable to list uploaded files"), "")
 		}
-		fmt.Println()
+		fmt.Fprintf(tw, format, "", "", "")
 	}
+	tw.Flush()
+	fmt.Println()
 }
 
 func extractRemoteList(r remote.Remote) (out []string) {

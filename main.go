@@ -52,4 +52,44 @@ func main() {
 	// fmt.Println(">>>>", out, err)
 	// fmt.Println(len(out))
 
+	// a := [...]int{1, 2, 3}
+	// fmt.Println(&a[1])
+	// // a[1] = 33
+	// // fmt.Println(a)
+
+	// var b []int
+	// fmt.Println(b == nil)
+	// // b[1] = 1
+	// fmt.Println(b)
+
+	// // // b := append(a[:], a...)
+	// // // fmt.Println(b)
+	// var m map[int]bool
+	// fmt.Println(m == nil)
+
+	const (
+		A = 1
+		B = 3
+		C = 6
+	)
+	a := [...]int{A: 2, B: 4, C: 44}
+	fmt.Println(a)
+
+	// err := agent.BackupRollback()
+	// fmt.Println(err)
+
+	// t := entity.NewTar("", "ROLLBACK__1645727283.tar.gz", "resources/assets")
+	// err := t.Untar("resources/patch")
+	// fmt.Println(err)
+
+	// fmt.Println(strings.Compare("XX", "XXX"))
+	// format := "%v\t%v\t%v\t%v\t%v\t\n"
+	// tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
+	// fmt.Fprintf(tw, format, "Title", "Artist", "Album", "Year", "Length")
+	// fmt.Fprintf(tw, format, "-----", "------", "-----", "----", "------")
+	// fmt.Fprintf(tw, format, "	-----", "------", "----dfkdjfkdjfkdjfkdfj-", "----", "------")
+	// // for _, t := range tracks {
+	// // 	fmt.Fprintf(tw, format, t.Title, t.Artist, t.Album, t.Year, t.Length)
+	// // }
+	// tw.Flush() // calculate column widths and print table
 }

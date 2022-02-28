@@ -6,7 +6,8 @@ import (
 	"github.com/pnkj-kmr/infra-patch-manager/entity"
 )
 
-func backupExistingRollback() (err error) {
+// BackupRollback - helps to backup the rollback dir as assets
+func BackupRollback() (err error) {
 	d, err := entity.NewDir(entity.C.RollbackPath())
 	if err != nil {
 		log.Println("Unable to load rollback folder", entity.C.RollbackPath(), err)

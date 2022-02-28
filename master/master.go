@@ -202,7 +202,7 @@ func (m *_master) PatchTo(reqApps []remote.App) (apps []remote.App, err error) {
 		}
 		if err != nil {
 			m.log(m.remote.Name(), "PATCH: Cannot receieve stream data from server", err)
-			return nil, err
+			return apps, err
 		}
 
 		appInfo := res.GetApplications()
@@ -210,7 +210,6 @@ func (m *_master) PatchTo(reqApps []remote.App) (apps []remote.App, err error) {
 			apps = append(apps, m.APPToRemoteApp(x.GetApp(), x.GetVerified(), m.remote.Name(), x.GetData()))
 		}
 	}
-
 	return
 }
 
@@ -238,7 +237,7 @@ func (m *_master) VerifyFrom(reqApps []remote.App) (apps []remote.App, err error
 		}
 		if err != nil {
 			m.log(m.remote.Name(), "VERIFY: Cannot receieve stream data from server", err)
-			return nil, err
+			return apps, err
 		}
 
 		appInfo := res.GetApplications()
@@ -249,9 +248,9 @@ func (m *_master) VerifyFrom(reqApps []remote.App) (apps []remote.App, err error
 	return
 }
 
-func (m *_master) ExecuteCmdOnRemote(in string) (out []byte, err error) {
+func (m *_master) ExecuteCmdOnRemote(in, pass string) (out []byte, err error) {
 	m.log(m.remote.Name(), "EXECUTE: request with data request: ", in)
-	req := &pb.CmdReq{Cmd: in}
+	req := &pb.CmdReq{Cmd: in, Pass: pass}
 	res, err := m.connect.Execute(context.Background(), req)
 	if err != nil {
 		m.log(m.remote.Name(), "EXECUTE: request failed:", err)

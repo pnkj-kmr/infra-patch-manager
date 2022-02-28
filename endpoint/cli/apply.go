@@ -3,6 +3,9 @@ package cli
 import (
 	"flag"
 	"fmt"
+	"os"
+	"text/tabwriter"
+	"time"
 
 	"github.com/pnkj-kmr/infra-patch-manager/master"
 	"github.com/pnkj-kmr/infra-patch-manager/master/remote"
@@ -26,16 +29,17 @@ func HandleApply(cmd *flag.FlagSet) {
 				existingApps := cliHandler.GetRemoteApps(r, appName, appType)
 				pm, err := master.NewPatchMaster(r.Name(), false)
 				if err == nil {
-					apps, err := pm.PatchTo(existingApps)
-					if err != nil {
-						r.UpdateStatus(false)
-					} else {
+					apps, _ := pm.PatchTo(existingApps)
+					if len(apps) > 0 {
 						r.UpdateStatus(true)
+					} else {
+						r.UpdateStatus(false)
 					}
 					printApplyWithApps(r, existingApps, apps)
 				}
 				fmt.Println()
 			}
+			fmt.Println()
 		} else {
 			cliHandler.DefaultHelp()
 		}
@@ -46,15 +50,20 @@ func HandleApply(cmd *flag.FlagSet) {
 
 func printApplyWithApps(r remote.Remote, ex []remote.App, apps []remote.App) {
 	fmt.Println()
-	fmt.Printf("Remote name	: %s [%s]		%s\n", r.Name(), r.Type(), iif(r.Status(), greenText("--- OK"), redText("--- NOT REACHABLE")))
-	fmt.Printf("Applications	: %d [requested: %d]\n", len(apps), len(ex))
+	format := "%v\t%v\t%v\t\t\t%v\t\n"
+	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
+	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), "", iif(r.Status(), iif(len(ex) == len(apps), greenText("...OK"), yellowText("...PARTILLY APPLIED")), redText("...NOT REACHABLE")))
+	fmt.Fprintf(tw, format, "Applications", fmt.Sprintf("%d [requested: %d]", len(apps), len(ex)), "", "")
 	if len(ex) == 0 {
-		fmt.Printf("	%s\n\n", yellowText("No application found. To more refer conf/remotes.json"))
+		fmt.Fprintf(tw, format, "", yellowText("No application found. To more refer conf/remotes.json"), "", "")
+	} else if len(apps) == 0 {
+		fmt.Fprintf(tw, format, "", yellowText("No application(s) reachable"), "", "")
 	}
-	for i, a := range apps {
-		fmt.Printf("[%d]	%s	: [%s] %s		%s\n", i+1, a.Name(), a.Type(), a.SourcePath(), iif(a.Status(), greenText("APPLIED"), redText("NOT APPLIED")))
+	for _, a := range apps {
+		fmt.Fprintf(tw, format, fmt.Sprintf("%s [%s]", a.Name(), a.Type()), a.SourcePath(), "", iif(a.Status(), greenText("APPLIED"), redText("NOT APPLIED")))
 		for j, f := range a.GetFiles() {
-			fmt.Printf("		: [%d] - %s [%d]	- %s\n", j+1, f.Path(), f.Size(), f.ModTime().Local().String())
+			fmt.Fprintf(tw, format, "", fmt.Sprintf("[%d] %s [%d]", j+1, f.Path(), f.Size()), f.ModTime().Local().Format(time.Kitchen), "")
 		}
 	}
+	tw.Flush()
 }

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"text/tabwriter"
 
 	"github.com/pnkj-kmr/infra-patch-manager/entity"
 	"github.com/pnkj-kmr/infra-patch-manager/master"
@@ -71,11 +72,16 @@ func uploadToRemotes(allRemotes []remote.Remote, f entity.File) {
 }
 
 func printRemoteUpload(r remote.Remote, in entity.File, out entity.Entity, ok bool) {
-	fmt.Printf("Remote name	: %s [%s]		%s\n", r.Name(), r.Type(), iif(r.Status(), greenText("--- OK"), redText("--- NOT REACHABLE")))
-	fmt.Printf("Uploaded	: %s [%d]		%s\n", yellowText(in.Name()), in.Size(), iif(ok, greenText("UPLOADED"), redText("FAILED")))
+	format := "%v\t%v\t\t\t%v\t\n"
+	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
+	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")))
+	fmt.Fprintf(tw, format, "Requested", fmt.Sprintf("%s [%d]", in.Name(), in.Size()), "")
 	if ok {
-		fmt.Printf("	Name	: %s\n", out.Name())
-		fmt.Printf("	Size	: %d\n", out.Size())
-		fmt.Printf("	Path	: %s\n", out.Path())
+		fmt.Fprintf(tw, format, "Uploaded", fmt.Sprintf("Name - %s", out.Name()), iif(ok, greenText("UPLOADED"), redText("FAILED")))
+		fmt.Fprintf(tw, format, "", fmt.Sprintf("Size - %d", out.Size()), "")
+		fmt.Fprintf(tw, format, "", fmt.Sprintf("Path - %s", out.Path()), "")
+	} else {
+		fmt.Fprintf(tw, format, "Uploaded", "", iif(ok, greenText("UPLOADED"), redText("FAILED")))
 	}
+	tw.Flush()
 }

@@ -11,7 +11,8 @@ import (
 )
 
 // EnableAgentMode - basic setup for agent to run
-func EnableAgentMode() {
+func EnableAgentMode(p *string) {
+	passcode = *p
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatal("ERROR: ", err)
@@ -77,4 +78,9 @@ func Ping(in string) (out string) {
 		out = "PONG"
 	}
 	return
+}
+
+// VerifyPasscode helps to validate the agent passcode
+func VerifyPasscode(p string) (ok bool) {
+	return strings.Compare(p, passcode) == 0
 }

@@ -2,7 +2,10 @@ syntax = "proto3";
 
 option go_package = "./rpc/pb";
 
-message CmdReq { string cmd = 1; }
+message CmdReq {
+  string cmd = 1;
+  string pass = 2;
+}
 
 message CmdResp {
   bytes out = 1;

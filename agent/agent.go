@@ -197,7 +197,7 @@ func (a *_agent) PatchRollback() (err error) {
 	}
 
 	// backing up the rollback into assets
-	err = backupExistingRollback()
+	err = BackupRollback()
 	if err != nil {
 		return err
 	}
