@@ -1,3 +1,5 @@
+[![Infra Patch Manager](https://github.com/pnkj-kmr/infra-patch-manager/actions/workflows/release.yml/badge.svg)](https://github.com/pnkj-kmr/infra-patch-manager/actions/workflows/release.yml)
+
 # **Infra Patch Manager**
 
 _A **CLI tool** - which helps to maintain the remote infra patching. There is a scenario, a distributed system is running on multiple servers and an upgrade/change required for all these server's application(s) so there is an repeated activity will be performed to logging in each and every server's application to apply an upgrade._
@@ -18,7 +20,8 @@ _To setup the infrapm, taking reference server (Linux : x86_64). Download the la
 _and LICENSE, README.md, conf/remotes.json(for reference) etc._
 
 #### SETUP AGENT
-***
+
+---
 
 _Copy the `infrapm_agent` file to destination application server. Same agent setup steps will repeated for mutliple application servers. Copy on linux as_
 
@@ -79,9 +82,9 @@ _Make sure the infrapm agent working directory lies as follows_
         patch/
         rollback/
 
-
 #### SETUP MASTER
-***
+
+---
 
 _Copy the `infrapm` file at destination where application server(s) are reachable. And create a file as **conf/remotes.json** there as below, repeat servers and server applications configuration as needed._
 
