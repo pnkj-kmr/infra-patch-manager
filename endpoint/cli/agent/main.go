@@ -18,9 +18,12 @@ import (
 func main() {
 	port := flag.Int("port", 8008, "the server starting port")
 	p := flag.String("passcode", "infrapm", "passcode - extra secure")
+	prefix := flag.String("prefix", "resources", "default - path prefix")
 	flag.Parse()
-	log.Printf("server start on port: %d [passcode: %s]", *port, *p)
+	log.Printf("server start on port: %d [passcode: %s] - %s", *port, *p, *prefix)
 
+	// setting up the prefix dir
+	entity.SetupPrefix(prefix)
 	// enabling the agent mode
 	entity.EnableAgentMode(p)
 

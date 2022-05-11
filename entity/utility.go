@@ -10,9 +10,19 @@ import (
 	"time"
 )
 
+// SetupPrefix - basic setup for agent to run
+func SetupPrefix(p *string) {
+	resourceDir = *p // changing the default prefix to new one
+	assetsDir = filepath.Join(resourceDir, "assets")
+	patchDir = filepath.Join(resourceDir, "patch")
+	rollbackDir = filepath.Join(resourceDir, "rollback")
+	// reset for config variable
+	C = &_conf{patchDir, rollbackDir, assetsDir}
+}
+
 // EnableAgentMode - basic setup for agent to run
 func EnableAgentMode(p *string) {
-	passcode = *p
+	passcode = *p // setting up the passcode var
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatal("ERROR: ", err)
