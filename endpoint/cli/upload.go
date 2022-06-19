@@ -97,6 +97,7 @@ func uploadFile(r remote.Remote, f entity.File) (remote.Remote, entity.Entity, b
 }
 
 func uploadPrint(r remote.Remote, in entity.File, out entity.Entity, ok bool) {
+	LoaderSkip()
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	format := "%v\t%v\t\t\t%v\t\n"
 	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")))

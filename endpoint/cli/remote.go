@@ -62,6 +62,7 @@ func remotePing(r remote.Remote, ping bool) remote.Remote {
 }
 
 func remotePrint(r remote.Remote, ping bool) {
+	LoaderSkip()
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	format := "%v\t%v\t\t\t%v\t\n"
 	apps, _ := r.Apps()

@@ -20,19 +20,40 @@ func main() {
 	cli.DefaultCheck()
 	switch os.Args[1] {
 	case "remote":
+		s := cli.Loader()
+		s.Start()
 		cli.HandleRemote(remoteCmd)
+		s.Stop()
 	case "rights":
+		s := cli.Loader()
+		s.Start()
 		cli.HandleRights(rightsCmd)
+		s.Stop()
 	case "upload":
+		s := cli.Loader()
+		s.Start()
 		cli.HandleUpload(uploadCmd)
+		s.Stop()
 	case "extract":
+		s := cli.Loader()
+		s.Start()
 		cli.HandleExtract(extractCmd)
+		s.Stop()
 	case "apply":
+		s := cli.Loader()
+		s.Start()
 		cli.HandleApply(applyCmd)
+		s.Stop()
 	case "verify":
+		s := cli.Loader()
+		s.Start()
 		cli.HandleVerify(verifyCmd)
+		s.Stop()
 	case "exec":
+		s := cli.Loader()
+		s.Start()
 		cli.HandleRemoteCmd(execCmd)
+		s.Stop()
 	default:
 		cli.DefaultHelp()
 	}

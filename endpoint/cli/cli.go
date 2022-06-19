@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"text/tabwriter"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/pnkj-kmr/infra-patch-manager/master/remote"
 )
 
@@ -81,7 +83,7 @@ func (c *_cli) GetRemoteApps(r remote.Remote, name, apptype *string) (a []remote
 // DefaultHelp - print all helps
 func DefaultHelp() {
 	format := "\t\t%v\t| %v\t\n"
-	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
+	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	fmt.Printf("Infra-Patch-Manager contains the following subcommands set.\n\n")
 	fmt.Fprintf(tw, format, greenText("remote"), "list or search a remote detail with reachablity")
 	fmt.Fprintf(tw, format, greenText("rights"), "read/write rights check on a remote's application(s)")
@@ -120,4 +122,19 @@ func iif(condition bool, a interface{}, b interface{}) interface{} {
 		return a
 	}
 	return b
+}
+
+// Loader helps to show to running process status
+func Loader() *spinner.Spinner {
+	// spinSet := spinner.CharSets[26] // ...
+	// spinSet := spinner.CharSets[36] // [>>]
+	spinSet := []string{".", "..", "...", " ...", "  ...", "   ..."}
+	s := spinner.New(spinSet, 100*time.Millisecond)
+	// s.Prefix = "running "
+	return s
+}
+
+// LoaderSkip helps to skip the loader from terminal
+func LoaderSkip() {
+	fmt.Println("\r                                        ")
 }

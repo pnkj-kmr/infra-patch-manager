@@ -80,7 +80,7 @@ func extractFile(r remote.Remote, f string) (remote.Remote, []entity.Entity, boo
 }
 
 func extractPrint(r remote.Remote, name string, files []entity.Entity, ok bool) {
-	fmt.Println()
+	LoaderSkip()
 	format := "%v\t%v\t\t\t%v\t\n"
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")))
@@ -133,7 +133,7 @@ func extractList(r remote.Remote) (remote.Remote, []string) {
 }
 
 func extractListPrint(r remote.Remote, out []string) {
-	fmt.Println()
+	LoaderSkip()
 	format := "%v\t%v\t\t\t%v\t\n"
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")))

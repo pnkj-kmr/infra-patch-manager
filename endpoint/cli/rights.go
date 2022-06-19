@@ -75,7 +75,7 @@ func rightsCheck(r remote.Remote, existingApps []remote.App) (remote.Remote, []r
 }
 
 func rightsPrint(r remote.Remote, ex []remote.App, apps []remote.App) {
-	fmt.Println()
+	LoaderSkip()
 	format := "%v\t%v\t%v\t\t\t%v\t\n"
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), "", iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")))
@@ -86,7 +86,7 @@ func rightsPrint(r remote.Remote, ex []remote.App, apps []remote.App) {
 		fmt.Fprintf(tw, format, "", yellowText("No application(s) reachable"), "", "")
 	}
 	for i, a := range apps {
-		fmt.Fprintf(tw, format, "", fmt.Sprintf("[%d] %s [%s]", i+1, a.Name(), a.Type()), a.SourcePath(), iif(a.Status(), greenText("OK"), redText("NO R/W RIGHTS")))
+		fmt.Fprintf(tw, format, "", fmt.Sprintf("[%d] %s [%s]", i+1, a.Name(), a.Type()), a.SourcePath(), iif(a.Status(), greenText("OK"), redText("NO R/W ACCESS")))
 	}
 	tw.Flush()
 	fmt.Println()

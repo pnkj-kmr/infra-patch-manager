@@ -76,7 +76,7 @@ func verifyNow(r remote.Remote, existingApps []remote.App) (remote.Remote, []rem
 }
 
 func verifyPrint(r remote.Remote, ex []remote.App, apps []remote.App) {
-	fmt.Println()
+	LoaderSkip()
 	format := "%v\t%v\t%v\t\t\t%v\t\n"
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), "", iif(r.Status(), iif(len(ex) == len(apps), greenText("...OK"), yellowText("...PARTILLY VERIFIED")), redText("...NOT REACHABLE")))

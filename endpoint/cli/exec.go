@@ -147,6 +147,7 @@ func executeCmd(r remote.Remote, cmds map[string]string, passcode *string) (out 
 }
 
 func executePrint(r remote.Remote, out map[string][]byte, err error) {
+	LoaderSkip()
 	var e string
 	if err != nil {
 		e = err.Error()

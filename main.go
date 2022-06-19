@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"time"
+
+	"github.com/briandowns/spinner"
 )
 
 func main() {
@@ -94,6 +96,13 @@ func main() {
 	// // }
 	// tw.Flush() // calculate column widths and print table
 
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond) // Build our new spinner
+	s.Prefix = "running"
+	// s.Suffix = "\t\n"
+	s.UpdateCharSet(spinner.CharSets[26])
+	s.Start()                   // Start the spinner
+	time.Sleep(4 * time.Second) // Run for some time to simulate work
+
 	st := time.Now()
 	out := make(chan string, 5)
 	// done := make(chan interface{})
@@ -103,7 +112,7 @@ func main() {
 	}
 	var x int
 	for y := range out {
-		fmt.Println(".....", y)
+		fmt.Println("\r.....", y)
 		x++
 		if x == 5 {
 			close(out)
@@ -117,6 +126,11 @@ func main() {
 	}
 	fmt.Println("....", time.Since(st))
 
+	// s.Prefix = ""
+	// s.UpdateCharSet([]string{})
+	// s.Restart()
+	// fmt.Println("\r")
+	s.Stop()
 }
 
 func test(x int, out chan<- string) {
