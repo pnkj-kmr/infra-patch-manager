@@ -24,10 +24,10 @@ func HandleExtract(cmd *flag.FlagSet) {
 	if *remoteAll || *remoteType != "" || *remoteName != "" {
 		if *listfiles {
 			remotes := cliHandler.GetRemotes(remoteName, remoteType)
-			printExtractList(remotes)
+			extractListFunc(remotes)
 		} else if *filename != "" {
 			remotes := cliHandler.GetRemotes(remoteName, remoteType)
-			extractToRemote(remotes, *filename)
+			extractFunc(remotes, *filename)
 		} else {
 			cliHandler.DefaultHelp()
 		}
@@ -36,27 +36,53 @@ func HandleExtract(cmd *flag.FlagSet) {
 	}
 }
 
-func extractToRemote(allRemotes []remote.Remote, f string) {
+func extractFunc(remotes []remote.Remote, f string) {
 	fmt.Println()
-	for _, r := range allRemotes {
-		pm, err := master.NewPatchMaster(r.Name(), false)
-		if err == nil {
-			files, ok, err := pm.ExtractFileToRemote("", f)
-			if err != nil {
-				r.UpdateStatus(false)
-			} else {
-				r.UpdateStatus(true)
-			}
-			printRemoteExtract(r, f, files, ok)
-			fmt.Println()
+	i, t := 0, len(remotes)
+	type extractChan struct {
+		r   remote.Remote
+		f   string
+		out []entity.Entity
+		ok  bool
+	}
+	result := make(chan extractChan, t)
+	for _, r := range remotes {
+		go func(r remote.Remote, result chan<- extractChan) {
+			r, out, ok := extractFile(r, f)
+			result <- extractChan{r, f, out, ok}
+		}(r, result)
+	}
+	for ch := range result {
+		extractPrint(ch.r, ch.f, ch.out, ch.ok)
+		i++
+		if i == t {
+			close(result)
 		}
 	}
 	fmt.Println()
 }
 
-func printRemoteExtract(r remote.Remote, name string, files []entity.Entity, ok bool) {
+func extractFile(r remote.Remote, f string) (remote.Remote, []entity.Entity, bool) {
+	pm, err := master.NewPatchMaster(r.Name(), false)
+	var out []entity.Entity
+	var ok bool
+	if err == nil {
+		files, status, err := pm.ExtractFileToRemote("", f)
+		if err != nil {
+			r.UpdateStatus(false)
+		} else {
+			r.UpdateStatus(true)
+		}
+		out = files
+		ok = status
+	}
+	return r, out, ok
+}
+
+func extractPrint(r remote.Remote, name string, files []entity.Entity, ok bool) {
+	fmt.Println()
 	format := "%v\t%v\t\t\t%v\t\n"
-	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
+	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")))
 	fmt.Fprintf(tw, format, "Extract", name, iif(ok, greenText("EXTRACTED"), redText("FAILED")))
 	if ok {
@@ -67,35 +93,57 @@ func printRemoteExtract(r remote.Remote, name string, files []entity.Entity, ok 
 		fmt.Fprintf(tw, format, "", redText("Unable to extract"), "")
 	}
 	tw.Flush()
+	fmt.Println()
 }
 
-func printExtractList(remotes []remote.Remote) {
+func extractListFunc(remotes []remote.Remote) {
 	fmt.Println()
-	format := "%v\t%v\t\t\t%v\t\n"
-	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
-	for _, r := range remotes {
-		out := extractRemoteList(r)
-		fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")))
-		if len(out) > 0 {
-			for i, f := range out {
-				fmt.Fprintf(tw, format, iif(i == 0, "List output", ""), fmt.Sprintf("[%d] %s", i+1, yellowText(f)), "")
-			}
-		} else {
-			fmt.Fprintf(tw, format, "", redText("Unable to list uploaded files"), "")
-		}
-		fmt.Fprintf(tw, format, "", "", "")
+	i, t := 0, len(remotes)
+	type extractChan struct {
+		r   remote.Remote
+		out []string
 	}
-	tw.Flush()
+	result := make(chan extractChan, t)
+	for _, r := range remotes {
+		go func(r remote.Remote, result chan<- extractChan) {
+			r, out := extractList(r)
+			result <- extractChan{r, out}
+		}(r, result)
+	}
+	for ch := range result {
+		extractListPrint(ch.r, ch.out)
+		i++
+		if i == t {
+			close(result)
+		}
+	}
 	fmt.Println()
 }
 
-func extractRemoteList(r remote.Remote) (out []string) {
+func extractList(r remote.Remote) (remote.Remote, []string) {
 	pm, err := master.NewPatchMaster(r.Name(), false)
+	var out []string
 	if err == nil {
 		out, err = pm.ListAvailablePatches()
 		if err == nil {
 			r.UpdateStatus(true)
 		}
 	}
-	return
+	return r, out
+}
+
+func extractListPrint(r remote.Remote, out []string) {
+	fmt.Println()
+	format := "%v\t%v\t\t\t%v\t\n"
+	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
+	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")))
+	if len(out) > 0 {
+		for i, f := range out {
+			fmt.Fprintf(tw, format, iif(i == 0, "List output", ""), fmt.Sprintf("[%d] %s", i+1, yellowText(f)), "")
+		}
+	} else {
+		fmt.Fprintf(tw, format, "", redText("Unable to list uploaded files"), "")
+	}
+	fmt.Fprintf(tw, format, "", "", "")
+	tw.Flush()
 }

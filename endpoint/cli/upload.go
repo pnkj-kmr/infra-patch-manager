@@ -29,7 +29,7 @@ func HandleUpload(cmd *flag.FlagSet) {
 	}
 	if *remoteAll || *remoteType != "" || *remoteName != "" {
 		remotes := cliHandler.GetRemotes(remoteName, remoteType)
-		uploadToRemotes(remotes, f)
+		uploadFunc(remotes, f)
 	} else {
 		cliHandler.DefaultHelp()
 	}
@@ -53,27 +53,52 @@ func checkPath(path *string) entity.File {
 	return f
 }
 
-func uploadToRemotes(allRemotes []remote.Remote, f entity.File) {
+func uploadFunc(remotes []remote.Remote, f entity.File) {
 	fmt.Println()
-	for _, r := range allRemotes {
-		pm, err := master.NewPatchMaster(r.Name(), false)
-		if err == nil {
-			uploaded, ok, err := pm.UploadFileToRemote(f)
-			if err != nil {
-				r.UpdateStatus(false)
-			} else {
-				r.UpdateStatus(true)
-			}
-			printRemoteUpload(r, f, uploaded, ok)
-			fmt.Println()
+	i, t := 0, len(remotes)
+	type uploadChan struct {
+		r   remote.Remote
+		in  entity.File
+		out entity.Entity
+		ok  bool
+	}
+	result := make(chan uploadChan, t)
+	for _, r := range remotes {
+		go func(r remote.Remote, result chan<- uploadChan) {
+			r, out, ok := uploadFile(r, f)
+			result <- uploadChan{r, f, out, ok}
+		}(r, result)
+	}
+	for ch := range result {
+		uploadPrint(ch.r, ch.in, ch.out, ch.ok)
+		i++
+		if i == t {
+			close(result)
 		}
 	}
 	fmt.Println()
 }
 
-func printRemoteUpload(r remote.Remote, in entity.File, out entity.Entity, ok bool) {
+func uploadFile(r remote.Remote, f entity.File) (remote.Remote, entity.Entity, bool) {
+	pm, err := master.NewPatchMaster(r.Name(), false)
+	var out entity.Entity
+	var ok bool
+	if err == nil {
+		uploaded, status, err := pm.UploadFileToRemote(f)
+		if err != nil {
+			r.UpdateStatus(false)
+		} else {
+			r.UpdateStatus(true)
+		}
+		out = uploaded
+		ok = status
+	}
+	return r, out, ok
+}
+
+func uploadPrint(r remote.Remote, in entity.File, out entity.Entity, ok bool) {
+	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	format := "%v\t%v\t\t\t%v\t\n"
-	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
 	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")))
 	fmt.Fprintf(tw, format, "Requested", fmt.Sprintf("%s [%d]", in.Name(), in.Size()), "")
 	if ok {
@@ -84,4 +109,5 @@ func printRemoteUpload(r remote.Remote, in entity.File, out entity.Entity, ok bo
 		fmt.Fprintf(tw, format, "Uploaded", "", iif(ok, greenText("UPLOADED"), redText("FAILED")))
 	}
 	tw.Flush()
+	fmt.Println()
 }

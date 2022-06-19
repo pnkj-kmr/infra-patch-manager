@@ -24,21 +24,7 @@ func HandleRights(cmd *flag.FlagSet) {
 	if *remoteAll || *remoteType != "" || *remoteName != "" {
 		remotes := cliHandler.GetRemotes(remoteName, remoteType)
 		if *appAll || *appType != "" || *appName != "" {
-			for _, r := range remotes {
-				existingApps := cliHandler.GetRemoteApps(r, appName, appType)
-				pm, err := master.NewPatchMaster(r.Name(), false)
-				if err == nil {
-					apps, err := pm.RightsCheckFor(existingApps)
-					if err != nil {
-						r.UpdateStatus(false)
-					} else {
-						r.UpdateStatus(true)
-					}
-					printRemoteWithApps(r, existingApps, apps)
-				}
-				fmt.Println()
-			}
-			fmt.Println()
+			rightsFunc(cliHandler, remotes, appName, appType)
 		} else {
 			cliHandler.DefaultHelp()
 		}
@@ -47,10 +33,51 @@ func HandleRights(cmd *flag.FlagSet) {
 	}
 }
 
-func printRemoteWithApps(r remote.Remote, ex []remote.App, apps []remote.App) {
+func rightsFunc(cli CLI, remotes []remote.Remote, appName, appType *string) {
+	fmt.Println()
+	i, t := 0, len(remotes)
+	type rightsChan struct {
+		r      remote.Remote
+		exApps []remote.App
+		apps   []remote.App
+	}
+	result := make(chan rightsChan, t)
+	for _, r := range remotes {
+		go func(r remote.Remote, result chan<- rightsChan) {
+			existingApps := cli.GetRemoteApps(r, appName, appType)
+			rr, apps := rightsCheck(r, existingApps)
+			result <- rightsChan{r: rr, exApps: existingApps, apps: apps}
+		}(r, result)
+	}
+	for ch := range result {
+		rightsPrint(ch.r, ch.exApps, ch.apps)
+		i++
+		if i == t {
+			close(result)
+		}
+	}
+	fmt.Println()
+}
+
+func rightsCheck(r remote.Remote, existingApps []remote.App) (remote.Remote, []remote.App) {
+	pm, err := master.NewPatchMaster(r.Name(), false)
+	var rApps []remote.App
+	if err == nil {
+		apps, err := pm.RightsCheckFor(existingApps)
+		if err != nil {
+			r.UpdateStatus(false)
+		} else {
+			r.UpdateStatus(true)
+		}
+		rApps = apps
+	}
+	return r, rApps
+}
+
+func rightsPrint(r remote.Remote, ex []remote.App, apps []remote.App) {
 	fmt.Println()
 	format := "%v\t%v\t%v\t\t\t%v\t\n"
-	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
+	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), "", iif(r.Status(), greenText("...OK"), redText("...NOT REACHABLE")))
 	fmt.Fprintf(tw, format, "Applications", fmt.Sprintf("%d [requested: %d]", len(apps), len(ex)), "", "")
 	if len(ex) == 0 {
@@ -62,4 +89,5 @@ func printRemoteWithApps(r remote.Remote, ex []remote.App, apps []remote.App) {
 		fmt.Fprintf(tw, format, "", fmt.Sprintf("[%d] %s [%s]", i+1, a.Name(), a.Type()), a.SourcePath(), iif(a.Status(), greenText("OK"), redText("NO R/W RIGHTS")))
 	}
 	tw.Flush()
+	fmt.Println()
 }

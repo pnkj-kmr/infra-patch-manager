@@ -25,21 +25,7 @@ func HandleVerify(cmd *flag.FlagSet) {
 	if *remoteAll || *remoteType != "" || *remoteName != "" {
 		remotes := cliHandler.GetRemotes(remoteName, remoteType)
 		if *appAll || *appType != "" || *appName != "" {
-			for _, r := range remotes {
-				existingApps := cliHandler.GetRemoteApps(r, appName, appType)
-				pm, err := master.NewPatchMaster(r.Name(), false)
-				if err == nil {
-					apps, _ := pm.VerifyFrom(existingApps)
-					if len(apps) > 0 {
-						r.UpdateStatus(true)
-					} else {
-						r.UpdateStatus(false)
-					}
-					printVerifyWithApps(r, existingApps, apps)
-				}
-				fmt.Println()
-			}
-			fmt.Println()
+			verifyFunc(cliHandler, remotes, appName, appType)
 		} else {
 			cliHandler.DefaultHelp()
 		}
@@ -48,10 +34,51 @@ func HandleVerify(cmd *flag.FlagSet) {
 	}
 }
 
-func printVerifyWithApps(r remote.Remote, ex []remote.App, apps []remote.App) {
+func verifyFunc(cli CLI, remotes []remote.Remote, appName, appType *string) {
+	fmt.Println()
+	i, t := 0, len(remotes)
+	type verifyChan struct {
+		r      remote.Remote
+		exApps []remote.App
+		apps   []remote.App
+	}
+	result := make(chan verifyChan, t)
+	for _, r := range remotes {
+		go func(r remote.Remote, result chan<- verifyChan) {
+			existingApps := cli.GetRemoteApps(r, appName, appType)
+			rr, apps := verifyNow(r, existingApps)
+			result <- verifyChan{r: rr, exApps: existingApps, apps: apps}
+		}(r, result)
+	}
+	for ch := range result {
+		verifyPrint(ch.r, ch.exApps, ch.apps)
+		i++
+		if i == t {
+			close(result)
+		}
+	}
+	fmt.Println()
+}
+
+func verifyNow(r remote.Remote, existingApps []remote.App) (remote.Remote, []remote.App) {
+	pm, err := master.NewPatchMaster(r.Name(), false)
+	var rApps []remote.App
+	if err == nil {
+		apps, _ := pm.VerifyFrom(existingApps)
+		if len(apps) > 0 {
+			r.UpdateStatus(true)
+		} else {
+			r.UpdateStatus(false)
+		}
+		rApps = apps
+	}
+	return r, rApps
+}
+
+func verifyPrint(r remote.Remote, ex []remote.App, apps []remote.App) {
 	fmt.Println()
 	format := "%v\t%v\t%v\t\t\t%v\t\n"
-	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
+	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	fmt.Fprintf(tw, format, "Remote name", fmt.Sprintf("%s [%s]", r.Name(), r.Type()), "", iif(r.Status(), iif(len(ex) == len(apps), greenText("...OK"), yellowText("...PARTILLY VERIFIED")), redText("...NOT REACHABLE")))
 	fmt.Fprintf(tw, format, "Applications", fmt.Sprintf("%d [requested: %d]", len(apps), len(ex)), "", "")
 	if len(ex) == 0 {
@@ -66,4 +93,5 @@ func printVerifyWithApps(r remote.Remote, ex []remote.App, apps []remote.App) {
 		}
 	}
 	tw.Flush()
+	fmt.Println()
 }

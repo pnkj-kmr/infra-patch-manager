@@ -16,15 +16,15 @@ type CLI interface {
 	GetRemoteApps(remote.Remote, *string, *string) []remote.App
 }
 
+type _cli struct {
+	cmd     *flag.FlagSet
+	helpMsg string
+}
+
 // NewCLIHander - get a hander of cli
 func NewCLIHander(c *flag.FlagSet, s string) CLI {
 	c.Parse(os.Args[2:])
 	return &_cli{c, s}
-}
-
-type _cli struct {
-	cmd     *flag.FlagSet
-	helpMsg string
 }
 
 func (c *_cli) DefaultHelp() {
@@ -32,14 +32,6 @@ func (c *_cli) DefaultHelp() {
 	fmt.Println()
 	c.cmd.PrintDefaults()
 	fmt.Printf("\n\n")
-}
-
-func defaultRemoteCheck(r []remote.Remote) {
-	if len(r) == 0 {
-		fmt.Printf("Infra-Patch-Manager contains the subcommands set.\n\n")
-		fmt.Printf("\t%s\n\n", yellowText("- No Remote configured. check conf/remotes.json"))
-		os.Exit(0)
-	}
 }
 
 func (c *_cli) GetRemotes(name, rtype *string) (r []remote.Remote) {
@@ -111,6 +103,14 @@ func DefaultCheck() {
 		fmt.Fprintf(tw, format, greenText("help"), "to know more about subcommands")
 		tw.Flush()
 		fmt.Printf("\n\n")
+		os.Exit(0)
+	}
+}
+
+func defaultRemoteCheck(r []remote.Remote) {
+	if len(r) == 0 {
+		fmt.Printf("Infra-Patch-Manager contains the subcommands set.\n\n")
+		fmt.Printf("\t%s\n\n", yellowText("- No Remote configured. check conf/remotes.json"))
 		os.Exit(0)
 	}
 }

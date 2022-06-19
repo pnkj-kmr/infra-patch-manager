@@ -176,23 +176,36 @@ func (p *_ps) Apply(req *pb.ApplyReq, stream pb.Patch_ApplyServer) (err error) {
 			return err
 		}
 		agent, err := NewPatchAgent(app.GetSource(), i == 0) // taking first app backup
-		if err != nil {
-			return err
-		}
-		// applying patch
-		err = agent.PatchNow()
-		if err != nil {
-			return err
-		}
-		// verifying the applied patch
-		files, Ok, err := agent.VerifyPatched()
-		var ff []*pb.FILE
-		for _, f := range files {
-			ff = append(ff, rpc.EntityToFILE(f))
-		}
-		err = found(app, Ok, ff)
-		if err != nil {
-			return err
+		if err == nil {
+			// applying patch
+			err = agent.PatchNow()
+			if err != nil {
+				log.Println("Patch apply failed for", app.GetName())
+				var Ok bool
+				var ff []*pb.FILE
+				err = found(app, Ok, ff)
+				if err != nil {
+					return err
+				}
+				return err
+			}
+			// verifying the applied patch
+			files, Ok, err := agent.VerifyPatched()
+			var ff []*pb.FILE
+			for _, f := range files {
+				ff = append(ff, rpc.EntityToFILE(f))
+			}
+			err = found(app, Ok, ff)
+			if err != nil {
+				return err
+			}
+		} else {
+			var Ok bool
+			var ff []*pb.FILE
+			err = found(app, Ok, ff)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	log.Println("PATCHED: T:", time.Since(start))
@@ -229,18 +242,24 @@ func (p *_ps) Verify(req *pb.VerifyReq, stream pb.Patch_VerifyServer) (err error
 			return err
 		}
 		agent, err := NewPatchAgent(app.GetSource(), false)
-		if err != nil {
-			return err
-		}
-		// verifying the applied patch
-		files, Ok, err := agent.VerifyPatched()
-		var ff []*pb.FILE
-		for _, f := range files {
-			ff = append(ff, rpc.EntityToFILE(f))
-		}
-		err = found(app, Ok, ff)
-		if err != nil {
-			return err
+		if err == nil {
+			// verifying the applied patch
+			files, Ok, err := agent.VerifyPatched()
+			var ff []*pb.FILE
+			for _, f := range files {
+				ff = append(ff, rpc.EntityToFILE(f))
+			}
+			err = found(app, Ok, ff)
+			if err != nil {
+				return err
+			}
+		} else {
+			var Ok bool
+			var ff []*pb.FILE
+			err = found(app, Ok, ff)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	log.Println("VERIFIED: T:", time.Since(start))

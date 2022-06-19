@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
 func main() {
@@ -67,13 +68,13 @@ func main() {
 	// var m map[int]bool
 	// fmt.Println(m == nil)
 
-	const (
-		A = 1
-		B = 3
-		C = 6
-	)
-	a := [...]int{A: 2, B: 4, C: 44}
-	fmt.Println(a)
+	// const (
+	// 	A = 1
+	// 	B = 3
+	// 	C = 6
+	// )
+	// a := [...]int{A: 2, B: 4, C: 44}
+	// fmt.Println(a)
 
 	// err := agent.BackupRollback()
 	// fmt.Println(err)
@@ -92,4 +93,38 @@ func main() {
 	// // 	fmt.Fprintf(tw, format, t.Title, t.Artist, t.Album, t.Year, t.Length)
 	// // }
 	// tw.Flush() // calculate column widths and print table
+
+	st := time.Now()
+	out := make(chan string, 5)
+	// done := make(chan interface{})
+
+	for i := 0; i < 5; i++ {
+		go test(i+1, out)
+	}
+	var x int
+	for y := range out {
+		fmt.Println(".....", y)
+		x++
+		if x == 5 {
+			close(out)
+		}
+
+	}
+	fmt.Println("....", time.Since(st))
+	st = time.Now()
+	for i := 0; i < 5; i++ {
+		test2(i + 1)
+	}
+	fmt.Println("....", time.Since(st))
+
+}
+
+func test(x int, out chan<- string) {
+	time.Sleep(time.Millisecond)
+	out <- "hello - " + fmt.Sprintf("%v", x)
+}
+
+func test2(x int) string {
+	time.Sleep(time.Millisecond)
+	return "hello - " + fmt.Sprintf("%v", x)
 }
