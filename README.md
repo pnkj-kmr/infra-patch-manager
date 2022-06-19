@@ -12,7 +12,7 @@ _Here, **infrapm** (Infra Patch Manager) does the work. it helps to maintain an 
 
 _**infrapm** has master/minion(agent) concept to work over servers. One infrapm agent will be running on each server(s) as a service with specific port [default: 8008], infrapm master will stand where all application servers are reachable._
 
-_To setup the infrapm, taking reference server (Linux : x86_64). Download the latest infrapm release version with specific os-architure package. After extracting the package two executable files mainly as_
+_To setup the infrapm, taking reference server (Linux : x86_64). [Download](https://github.com/pnkj-kmr/infra-patch-manager/releases/) the latest infrapm release version with specific os-architure package. After extracting the package two executable files mainly as_
 
 - `infrapm`
 - `infrapm_agent`
@@ -159,4 +159,4 @@ _As completed the setup of infrapm application in two phase agent (repeated inst
 
 > ./infrapm extract -remote-all -list
 
-_Completed **:)**_
+_Happy Patching **:)**_
