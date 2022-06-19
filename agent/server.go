@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const maxFileSize = 50 * 1 << 20 // 50 MB file - max file
+const maxFileSize = 100 * 1 << 20 // 100 MB file - max file
 
 type _ps struct {
 	pb.UnimplementedPatchServer

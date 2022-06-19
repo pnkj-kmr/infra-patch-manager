@@ -15,6 +15,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const maxFileList = 20 // 20 max file listing
+
 type _agent struct {
 	assets   entity.Dir
 	patch    entity.Dir
@@ -275,8 +277,8 @@ func (a *_agent) ListAssets() (out []entity.Entity, err error) {
 	}
 	sort.Sort(s)
 	c := 0
-	if len(s) > 10 {
-		c = len(s) - 10
+	if len(s) > maxFileList {
+		c = len(s) - maxFileList
 	}
 	out = s[c:]
 	log.Println("LIST: found", a.assets.Path(), len(s), len(out), "T:", time.Since(start))
