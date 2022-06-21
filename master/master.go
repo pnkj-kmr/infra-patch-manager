@@ -19,7 +19,7 @@ import (
 	"github.com/pnkj-kmr/infra-patch-manager/rpc/pb"
 )
 
-const maxFileSize = 2 * 1 << 30 // 2GB - file size
+const maxFileSize int64 = 2 * 1 << 30 // 2GB - file size
 var maxSessionTimeout time.Duration = 60 * time.Second
 var defaultFileExt string = ".gz"
 
@@ -305,7 +305,7 @@ func (m *_master) DownloadFileFromRemote(f, writePath string) (file entity.File,
 	}
 
 	fileData := bytes.Buffer{}
-	fileSize := 0
+	var fileSize int64 = 0
 	// loop - getting all file chunk into buffer
 	for {
 		// checking download is cancel by send
@@ -324,9 +324,9 @@ func (m *_master) DownloadFileFromRemote(f, writePath string) (file entity.File,
 		}
 		// reading the file chunk
 		chunk := res.GetChunkData()
-		fileSize += len(chunk)
+		fileSize += int64(len(chunk))
 		if fileSize > maxFileSize {
-			return nil, fmt.Errorf("File is too large: %d > %d", fileSize, maxFileSize)
+			return nil, fmt.Errorf("File is too large: %v > %v", fileSize, maxFileSize)
 		}
 		// slow writing data into buffer
 		// time.Sleep(time.Second)
