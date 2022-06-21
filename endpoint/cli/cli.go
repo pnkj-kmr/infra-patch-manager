@@ -91,6 +91,7 @@ func DefaultHelp() {
 	fmt.Fprintf(tw, format, greenText("extract"), "untaring a tar.gz file on relative remote")
 	fmt.Fprintf(tw, format, greenText("apply"), "applying a patch to relative remote application(s)")
 	fmt.Fprintf(tw, format, greenText("verify"), "helps to validate an applied patch")
+	fmt.Fprintf(tw, format, greenText("download"), "helps to download the patch from remote")
 	fmt.Fprintf(tw, format, greenText("exec"), "helps to execute commands on remote(s)")
 	tw.Flush()
 	fmt.Print("\n\n")

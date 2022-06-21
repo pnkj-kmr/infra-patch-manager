@@ -2,11 +2,14 @@ package master
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -16,6 +19,7 @@ import (
 	"github.com/pnkj-kmr/infra-patch-manager/rpc/pb"
 )
 
+const maxFileSize = 2 * 1 << 30 // 2GB - file size
 var maxSessionTimeout time.Duration = 60 * time.Second
 var defaultFileExt string = ".gz"
 
@@ -275,6 +279,87 @@ func (m *_master) ListAvailablePatches() (out []string, err error) {
 	out = res.GetItems()
 	m.log(m.remote.Name(), "LIST: receieved response data:", len(out), err)
 	return
+}
+
+func (m *_master) DownloadFileFromRemote(f, writePath string) (file entity.File, err error) {
+	m.log(m.remote.Name(), "DOWNLOAD: request - ", f)
+
+	req := &pb.DownloadReq{
+		FileName: f,
+	}
+	stream, err := m.connect.Download(context.Background(), req)
+	if err != nil {
+		m.log(m.remote.Name(), "DOWNLOAD request failed:", err)
+		return
+	}
+
+	res, err := stream.Recv()
+	if err != nil {
+		m.log(m.remote.Name(), "DOWNLOAD data recieved failed:", err)
+		return
+	}
+	message := res.GetFile().GetMessage()
+	m.log(m.remote.Name(), "DOWNLOAD file info", res.GetFile().GetName(), message)
+	if message != "" {
+		return nil, fmt.Errorf(message)
+	}
+
+	fileData := bytes.Buffer{}
+	fileSize := 0
+	// loop - getting all file chunk into buffer
+	for {
+		// checking download is cancel by send
+		err := stream.Context().Err()
+		if err != nil {
+			m.log(m.remote.Name(), "DOWNLOAD context error", err)
+			return nil, err
+		}
+		res, err := stream.Recv()
+		if err == io.EOF {
+			m.log(m.remote.Name(), "DOWNLOAD: No more data to recieve")
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		// reading the file chunk
+		chunk := res.GetChunkData()
+		fileSize += len(chunk)
+		if fileSize > maxFileSize {
+			return nil, fmt.Errorf("File is too large: %d > %d", fileSize, maxFileSize)
+		}
+		// slow writing data into buffer
+		// time.Sleep(time.Second)
+		// writing into buffer
+		_, err = fileData.Write(chunk)
+		if err != nil {
+			return nil, fmt.Errorf("Cannot write chunk data: %v", err)
+		}
+	}
+	err = stream.CloseSend()
+
+	if writePath == "" {
+		writePath, err := os.Getwd()
+		if err != nil {
+			m.log(m.remote.Name(), "Current working dir", writePath, err)
+			return nil, err
+		}
+
+	}
+	fullPath := filepath.Join(writePath, f)
+	wf, err := os.Create(fullPath)
+	if err != nil {
+		m.log(m.remote.Name(), "Cannot create file with path - ", fullPath, err)
+		return nil, fmt.Errorf("target path error [%v] | %v", writePath, err.Error())
+	}
+	defer wf.Close()
+	n, err := fileData.WriteTo(wf)
+	if err != nil {
+		m.log(m.remote.Name(), "Cannot write file:", fullPath, err)
+		return nil, fmt.Errorf("file write error | %v", err.Error())
+	}
+	m.log(m.remote.Name(), "FILE_WRITTEN: ", fullPath, n)
+	return entity.NewFile(fullPath, writePath)
 }
 
 // RemoteAppToAPP - helps to convert

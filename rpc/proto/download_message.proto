@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "./rpc/pb";
+
+message DownloadReq { string file_name = 1; }
+
+message DownloadInfo {
+  string name = 1;
+  string message = 2;
+}
+
+message DownloadResp {
+  oneof data {
+    DownloadInfo file = 1;
+    bytes chunk_data = 2;
+  };
+}

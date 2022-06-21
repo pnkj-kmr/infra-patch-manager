@@ -1,10 +1,13 @@
 package agent
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"io"
 	"log"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -302,5 +305,79 @@ func (p *_ps) ListUploaded(ctx context.Context, req *pb.ListUploadedReq) (res *p
 	res = &pb.ListUploadedResp{
 		Items: items,
 	}
+	return
+}
+
+func (p *_ps) Download(req *pb.DownloadReq, stream pb.Patch_DownloadServer) (err error) {
+	start := time.Now()
+	fileName := req.GetFileName()
+	log.Println("Download request receieved:", fileName)
+
+	f, err := entity.NewFile(filepath.Join(entity.C.AssetPath(), fileName), entity.C.AssetPath())
+	if err != nil {
+		err = stream.Send(&pb.DownloadResp{Data: &pb.DownloadResp_File{
+			File: &pb.DownloadInfo{
+				Name:    fileName,
+				Message: err.Error(),
+			},
+		}})
+		return
+	}
+	log.Println("File : ", f.Path())
+
+	file, err := os.Open(f.Path())
+	if err != nil {
+		err = stream.Send(&pb.DownloadResp{Data: &pb.DownloadResp_File{
+			File: &pb.DownloadInfo{
+				Name:    fileName,
+				Message: err.Error(),
+			},
+		}})
+		return
+	}
+	log.Println("File opened to send")
+	defer file.Close()
+	err = stream.Send(&pb.DownloadResp{Data: &pb.DownloadResp_File{
+		File: &pb.DownloadInfo{
+			Name:    fileName,
+			Message: "",
+		},
+	}})
+	if err != nil {
+		log.Println("File info send: ERROR ", err)
+		return
+	}
+	log.Println("File info send: ", file.Name())
+
+	reader := bufio.NewReader(file)
+	buffer := make([]byte, 1024)
+	log.Println("File chunk sending..")
+	for {
+		n, err := reader.Read(buffer)
+		if err == io.EOF {
+			log.Println("No more data to send")
+			break
+		}
+		if err != nil {
+			log.Println("Error read ocurred - ", err)
+			return err
+		}
+
+		res := &pb.DownloadResp{
+			Data: &pb.DownloadResp_ChunkData{
+				ChunkData: buffer[:n],
+			},
+		}
+		// // slowing down data send
+		// time.Sleep(time.Second)
+		// log.Println("File sending chunk: ", n)
+		err = stream.Send(res)
+		if err != nil {
+			log.Println("Error while sending chunk - ", err)
+			return err
+		}
+	}
+
+	log.Println("DOWNLOADED: T:", time.Since(start))
 	return
 }

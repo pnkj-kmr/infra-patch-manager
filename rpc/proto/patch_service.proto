@@ -9,6 +9,7 @@ import "check_message.proto";
 import "verify_message.proto";
 import "extract_message.proto";
 import "cmd_message.proto";
+import "download_message.proto";
 
 service Patch {
   // unary rpc - ping status check
@@ -27,4 +28,6 @@ service Patch {
   rpc Execute(CmdReq) returns(CmdResp){};
   // unary rpc - cmd
   rpc ListUploaded(ListUploadedReq) returns(ListUploadedResp){};
+  // server streaming rpc - download in chunks
+  rpc Download(DownloadReq) returns(stream DownloadResp){};
 }

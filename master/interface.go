@@ -15,4 +15,5 @@ type PatchMaster interface {
 	VerifyFrom([]remote.App) ([]remote.App, error)
 	ExecuteCmdOnRemote(string, string) ([]byte, error)
 	ListAvailablePatches() ([]string, error)
+	DownloadFileFromRemote(string, string) (entity.File, error)
 }

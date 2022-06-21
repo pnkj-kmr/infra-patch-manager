@@ -15,6 +15,7 @@ func main() {
 	extractCmd := flag.NewFlagSet("extract", flag.ExitOnError)
 	applyCmd := flag.NewFlagSet("apply", flag.ExitOnError)
 	verifyCmd := flag.NewFlagSet("verify", flag.ExitOnError)
+	downloadCmd := flag.NewFlagSet("download", flag.ExitOnError)
 	execCmd := flag.NewFlagSet("exec", flag.ExitOnError)
 
 	cli.DefaultCheck()
@@ -53,6 +54,11 @@ func main() {
 		s := cli.Loader()
 		s.Start()
 		cli.HandleRemoteCmd(execCmd)
+		s.Stop()
+	case "download":
+		s := cli.Loader()
+		s.Start()
+		cli.HandleDownload(downloadCmd)
 		s.Stop()
 	default:
 		cli.DefaultHelp()

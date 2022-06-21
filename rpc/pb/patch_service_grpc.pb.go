@@ -34,6 +34,8 @@ type PatchClient interface {
 	Execute(ctx context.Context, in *CmdReq, opts ...grpc.CallOption) (*CmdResp, error)
 	// unary rpc - cmd
 	ListUploaded(ctx context.Context, in *ListUploadedReq, opts ...grpc.CallOption) (*ListUploadedResp, error)
+	// server streaming rpc - download in chunks
+	Download(ctx context.Context, in *DownloadReq, opts ...grpc.CallOption) (Patch_DownloadClient, error)
 }
 
 type patchClient struct {
@@ -187,6 +189,38 @@ func (c *patchClient) ListUploaded(ctx context.Context, in *ListUploadedReq, opt
 	return out, nil
 }
 
+func (c *patchClient) Download(ctx context.Context, in *DownloadReq, opts ...grpc.CallOption) (Patch_DownloadClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Patch_ServiceDesc.Streams[3], "/Patch/Download", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &patchDownloadClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Patch_DownloadClient interface {
+	Recv() (*DownloadResp, error)
+	grpc.ClientStream
+}
+
+type patchDownloadClient struct {
+	grpc.ClientStream
+}
+
+func (x *patchDownloadClient) Recv() (*DownloadResp, error) {
+	m := new(DownloadResp)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // PatchServer is the server API for Patch service.
 // All implementations must embed UnimplementedPatchServer
 // for forward compatibility
@@ -207,6 +241,8 @@ type PatchServer interface {
 	Execute(context.Context, *CmdReq) (*CmdResp, error)
 	// unary rpc - cmd
 	ListUploaded(context.Context, *ListUploadedReq) (*ListUploadedResp, error)
+	// server streaming rpc - download in chunks
+	Download(*DownloadReq, Patch_DownloadServer) error
 	mustEmbedUnimplementedPatchServer()
 }
 
@@ -237,6 +273,9 @@ func (UnimplementedPatchServer) Execute(context.Context, *CmdReq) (*CmdResp, err
 }
 func (UnimplementedPatchServer) ListUploaded(context.Context, *ListUploadedReq) (*ListUploadedResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUploaded not implemented")
+}
+func (UnimplementedPatchServer) Download(*DownloadReq, Patch_DownloadServer) error {
+	return status.Errorf(codes.Unimplemented, "method Download not implemented")
 }
 func (UnimplementedPatchServer) mustEmbedUnimplementedPatchServer() {}
 
@@ -409,6 +448,27 @@ func _Patch_ListUploaded_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Patch_Download_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(DownloadReq)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(PatchServer).Download(m, &patchDownloadServer{stream})
+}
+
+type Patch_DownloadServer interface {
+	Send(*DownloadResp) error
+	grpc.ServerStream
+}
+
+type patchDownloadServer struct {
+	grpc.ServerStream
+}
+
+func (x *patchDownloadServer) Send(m *DownloadResp) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Patch_ServiceDesc is the grpc.ServiceDesc for Patch service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -451,6 +511,11 @@ var Patch_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "Verify",
 			Handler:       _Patch_Verify_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "Download",
+			Handler:       _Patch_Download_Handler,
 			ServerStreams: true,
 		},
 	},
