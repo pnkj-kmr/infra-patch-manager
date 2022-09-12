@@ -90,27 +90,27 @@ func executeFunc2(cli CLI, remotes []remote.Remote, passcode, appName, appType *
 			if portCheck {
 				for _, a := range apps {
 					// TODO - OS dependent - added for linux
-					cmds[a.Name()] = fmt.Sprintf("netstat -aneop | grep :%s", a.AppPort())
+					cmds[a.Name()] = fmt.Sprintf("netstat -aenop | grep :%s", a.AppPort())
 				}
 			} else if stop {
 				for _, a := range apps {
 					// TODO - OS dependent - added for linux
-					cmds[a.Name()] = fmt.Sprintf("service stop %s", a.ServiceName())
+					cmds[a.Name()] = fmt.Sprintf("service %s stop", a.ServiceName())
 				}
 			} else if restart {
 				for _, a := range apps {
 					// TODO - OS dependent - added for linux
-					cmds[a.Name()] = fmt.Sprintf("service restart %s", a.ServiceName())
+					cmds[a.Name()] = fmt.Sprintf("service %s restart", a.ServiceName())
 				}
 			} else if start {
 				for _, a := range apps {
 					// TODO - OS dependent - added for linux
-					cmds[a.Name()] = fmt.Sprintf("service start %s", a.ServiceName())
+					cmds[a.Name()] = fmt.Sprintf("service %s start", a.ServiceName())
 				}
 			} else if status {
 				for _, a := range apps {
 					// TODO - OS dependent - added for linux
-					cmds[a.Name()] = fmt.Sprintf("service status %s", a.ServiceName())
+					cmds[a.Name()] = fmt.Sprintf("service %s status", a.ServiceName())
 				}
 			}
 			out, err := executeCmd(r, cmds, passcode)
