@@ -1,6 +1,6 @@
 module github.com/pnkj-kmr/infra-patch-manager
 
-go 1.18
+go 1.17
 
 require (
 	github.com/briandowns/spinner v1.18.1

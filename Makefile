@@ -51,3 +51,6 @@ build:
 
 .PHONY:
 	clean run gen test tidy master agent clean_grpc clean_build release
+
+# git tag -a v0.2.2 -m "mag"
+# git push
